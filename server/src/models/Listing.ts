@@ -1,0 +1,55 @@
+import mongoose, { Schema, Document } from "mongoose";
+
+export interface IListing extends Document {
+  farmer_id: mongoose.Types.ObjectId;
+  title: string;
+  category: "broiler" | "layer" | "chick" | "egg" | "other";
+  breed?: string;
+  quantity: number;
+  unit: string;
+  farmer_price: number;
+  buyer_price?: number;
+  status: "draft" | "pending_pricing" | "live" | "sold_out" | "archived";
+  location?: string;
+  description?: string;
+  image_urls: string[];
+  created_at: Date;
+  updated_at: Date;
+}
+
+const ListingSchema: Schema = new Schema(
+  {
+    farmer_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    title: { type: String, required: true, trim: true },
+    category: {
+      type: String,
+      enum: ["broiler", "layer", "chick", "egg", "other"],
+      required: true,
+    },
+    breed: { type: String, trim: true },
+    quantity: { type: Number, required: true, min: 0 },
+    unit: { type: String, default: "bird", trim: true },
+    farmer_price: { type: Number, required: true, min: 0 },
+    buyer_price: { type: Number, min: 0 },
+    status: {
+      type: String,
+      enum: ["draft", "pending_pricing", "live", "sold_out", "archived"],
+      default: "pending_pricing",
+    },
+    location: { type: String, trim: true },
+    description: { type: String, trim: true },
+    image_urls: { type: [String], default: [] },
+  },
+  {
+    timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
+  }
+);
+
+ListingSchema.virtual("id").get(function (this: IListing) {
+  return this._id.toString();
+});
+
+ListingSchema.set("toJSON", { virtuals: true });
+ListingSchema.set("toObject", { virtuals: true });
+
+export default mongoose.model<IListing>("Listing", ListingSchema);
