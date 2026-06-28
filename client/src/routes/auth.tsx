@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Sprout } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,7 +41,7 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/dashboard", replace: true });
     });
   }, [navigate]);
@@ -52,7 +51,7 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { error } = await auth.signUp({
           email,
           password,
           options: {
@@ -69,32 +68,13 @@ function AuthPage() {
         toast.success("Account created — waiting for admin approval.");
         navigate({ to: "/dashboard", replace: true });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back");
         navigate({ to: "/dashboard", replace: true });
       }
     } catch (err: any) {
       toast.error(err?.message ?? "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleGoogle() {
-    setLoading(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        toast.error(result.error.message ?? "Google sign-in failed");
-        return;
-      }
-      if (result.redirected) return;
-      navigate({ to: "/dashboard", replace: true });
-    } catch (err: any) {
-      toast.error(err?.message ?? "Google sign-in failed");
     } finally {
       setLoading(false);
     }
@@ -138,13 +118,7 @@ function AuthPage() {
               : "Sign in to access your marketplace."}
           </p>
 
-          <Button variant="outline" className="mt-6 w-full" onClick={handleGoogle} disabled={loading}>
-            Continue with Google
-          </Button>
 
-          <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wide text-muted-foreground">
-            <div className="h-px flex-1 bg-border" /> or email <div className="h-px flex-1 bg-border" />
-          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (

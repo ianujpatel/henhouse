@@ -70,7 +70,7 @@ export const adminListAllListings = async (req: AuthRequest, res: Response): Pro
       .populate("farmer_id", "full_name farm_name")
       .sort({ created_at: -1 });
 
-    // Format population to match Supabase's `{ ..., profiles: { full_name, farm_name } }`
+    // Format population to include profiles: `{ ..., profiles: { full_name, farm_name } }`
     const result = listings.map((listing) => {
       const lJson = listing.toJSON() as any;
       const farmer: any = lJson.farmer_id;

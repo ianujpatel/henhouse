@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/lib/auth";
 
 export type AppRole = "admin" | "farmer" | "buyer";
 export type UserStatus = "pending" | "approved" | "rejected";
@@ -19,7 +19,7 @@ export function useSession(): SessionInfo {
 
   useEffect(() => {
     let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
+    auth.getSession().then(({ data }) => {
       if (!mounted) return;
       setState({ user: data.session?.user ?? null, session: data.session, loading: false });
     });

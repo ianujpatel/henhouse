@@ -27,7 +27,7 @@ const UserSchema: Schema = new Schema(
   }
 );
 
-// Virtual for id mapping to keep compatibility with supabase return type (id instead of _id)
+// Virtual for id mapping to keep compatibility with client-side expectations (id instead of _id)
 UserSchema.virtual("id").get(function (this: IUser) {
   return this._id.toString();
 });
