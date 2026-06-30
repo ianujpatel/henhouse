@@ -36,3 +36,8 @@ export const getListingForBuyer = async ({ data }: { data: { id: string } }) => 
   const res = await api.get(`/api/listings/buyer/${data.id}`);
   return res.data;
 };
+
+export const getListingForEdit = async ({ data }: { data: { id: string } }) => {
+  const res = await api.get(`/api/listings/detail/${data.id}`);
+  return res.data;
+};

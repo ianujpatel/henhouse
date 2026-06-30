@@ -67,10 +67,10 @@ export const adminSetUserStatus = async (req: AuthRequest, res: Response): Promi
 export const adminListAllListings = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
     const listings = await Listing.find({})
-      .populate("farmer_id", "full_name farm_name")
+      .populate("farmer_id", "full_name farm_name roles")
       .sort({ created_at: -1 });
 
-    // Format population to include profiles: `{ ..., profiles: { full_name, farm_name } }`
+    // Format population to include profiles: `{ ..., profiles: { full_name, farm_name, roles } }`
     const result = listings.map((listing) => {
       const lJson = listing.toJSON() as any;
       const farmer: any = lJson.farmer_id;
@@ -82,6 +82,7 @@ export const adminListAllListings = async (req: AuthRequest, res: Response): Pro
           ? {
               full_name: farmer.full_name,
               farm_name: farmer.farm_name,
+              roles: farmer.roles,
             }
           : null,
       };

@@ -1,8 +1,9 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bell, LogOut, Menu, Sprout } from "lucide-react";
+import { Bell, LogOut, Menu, Sprout, ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import { useCart } from "@/hooks/use-cart";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ export function AppHeader() {
   const listNotifsFn = useServerFn(listMyNotifications);
   const markReadFn = useServerFn(markNotificationRead);
   const [open, setOpen] = useState(false);
+  const { cartCount } = useCart();
 
   const meQ = useQuery({ queryKey: ["me"], queryFn: () => getMeFn(), retry: false });
   const notifsQ = useQuery({
@@ -90,6 +92,19 @@ export function AppHeader() {
         <div className="ml-auto flex items-center gap-2">
           {me ? (
             <>
+              {isBuyer && (
+                <Link
+                  to="/cart"
+                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground transition-colors shadow-soft"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  {cartCount > 0 && (
+                    <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">

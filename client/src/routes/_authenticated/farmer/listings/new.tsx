@@ -1,13 +1,15 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowLeft, Upload, X } from "lucide-react";
+import { ArrowLeft, Upload, X, Tags, Wheat } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -24,26 +26,50 @@ export const Route = createFileRoute("/_authenticated/farmer/listings/new")({
 });
 
 function NewListing() {
-  useRequireRole(["farmer"]);
+  useRequireRole(["farmer", "admin"]);
   const navigate = useNavigate();
   const fn = useServerFn(createListing);
+  
+  const meQ = useQuery({ queryKey: ["me"] });
+  const isAdmin = (meQ.data as any)?.roles?.includes("admin");
+  const dashboardLink = isAdmin ? "/admin/listings" : "/farmer";
+
   const [submitting, setSubmitting] = useState(false);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [images, setImages] = useState<{ public_id: string; secure_url: string; }[]>([]);
   const [uploading, setUploading] = useState(false);
+
+  const [productType, setProductType] = useState<"chicken" | "feed">("chicken");
+
   const [form, setForm] = useState({
     title: "",
-    category: "broiler" as "broiler" | "layer" | "chick" | "egg" | "other",
+    category: "broiler" as "broiler" | "layer" | "chick" | "egg" | "feed" | "other",
     breed: "",
     quantity: 10,
     unit: "Bird",
     farmer_price: "" as any,
     location: "",
     description: "",
+    brand: "",
+    is_featured_banner: false,
+    specifications: "",
   });
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
+    
+    // Validate size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image size must be less than 10MB");
+      return;
+    }
+    // Validate type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, JPEG, PNG, and WEBP images are supported");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("image", file);
 
@@ -52,7 +78,7 @@ function NewListing() {
       const res = await api.post("/api/listings/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setImageUrls([...imageUrls, res.data.url]);
+      setImages([...images, { public_id: res.data.public_id, secure_url: res.data.secure_url }]);
       toast.success("Image uploaded successfully");
     } catch (err: any) {
       toast.error(err?.message || "Failed to upload image");
@@ -72,18 +98,21 @@ function NewListing() {
       await fn({
         data: {
           title: form.title,
-          category: form.category,
-          breed: form.breed || null,
+          category: productType === "feed" ? "feed" : form.category,
+          breed: productType === "feed" ? null : (form.breed || null),
           quantity: Number(form.quantity),
           unit: form.unit,
           farmer_price: Number(form.farmer_price),
           location: form.location || null,
           description: form.description || null,
-          image_urls: imageUrls,
+          images: images,
+          brand: productType === "feed" ? form.brand : null,
+          is_featured_banner: isAdmin ? form.is_featured_banner : false,
+          specifications: productType === "feed" ? form.specifications : null,
         },
       });
-      toast.success("Listing submitted — admin will price it shortly");
-      navigate({ to: "/farmer" });
+      toast.success(isAdmin ? "Listing published live!" : "Listing submitted — admin will price it shortly");
+      navigate({ to: dashboardLink });
     } catch (e: any) {
       toast.error(e?.message ?? "Could not create listing");
     } finally {
@@ -91,85 +120,167 @@ function NewListing() {
     }
   }
 
+  // Adjust default unit when product type changes
+  const handleProductTypeChange = (type: "chicken" | "feed") => {
+    setProductType(type);
+    setForm((prev) => ({
+      ...prev,
+      unit: type === "feed" ? "Bag" : "Bird",
+      category: type === "feed" ? "feed" : "broiler",
+    }));
+  };
+
   return (
     <div className="min-h-screen">
       <AppHeader />
       <main className="container mx-auto max-w-2xl px-4 py-10">
-        <Link to="/farmer" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <Link to={dashboardLink} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back
         </Link>
         <h1 className="mt-4 font-display text-3xl font-semibold text-primary">New listing</h1>
         <p className="mt-1 text-muted-foreground">
-          Set your asking price — the admin will set the final buyer-facing price before publishing.
+          Fill in the details to publish a new chicken or feed listing on the marketplace.
         </p>
 
-        <form onSubmit={submit} className="mt-8 space-y-5 rounded-2xl border border-border bg-card p-6 shadow-soft">
+        {/* Product Type Selector */}
+        <div className="mt-6 grid grid-cols-2 gap-3 p-1.5 bg-secondary/30 rounded-2xl border border-border">
+          <button
+            type="button"
+            onClick={() => handleProductTypeChange("chicken")}
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
+              productType === "chicken"
+                ? "bg-card text-foreground shadow border border-border"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Tags className="h-4 w-4 text-primary" /> Chicken Listing
+          </button>
+          <button
+            type="button"
+            onClick={() => handleProductTypeChange("feed")}
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${
+              productType === "feed"
+                ? "bg-card text-foreground shadow border border-border"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Wheat className="h-4 w-4 text-primary" /> Feed Listing
+          </button>
+        </div>
+
+        <form onSubmit={submit} className="mt-6 space-y-5 rounded-2xl border border-border bg-card p-6 shadow-soft">
           <div>
-            <Label htmlFor="title">Title</Label>
-            <Input id="title" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Healthy broiler chickens, 8 weeks" />
+            <Label htmlFor="title">Title *</Label>
+            <Input 
+              id="title" 
+              required 
+              value={form.title} 
+              onChange={(e) => setForm({ ...form, title: e.target.value })} 
+              placeholder={productType === "chicken" ? "Healthy broiler chickens, 8 weeks" : "Premium poultry grower feed"} 
+            />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label>Category</Label>
-              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v as any })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {["broiler", "layer", "chick", "egg", "other"].map((c) => (
-                    <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+          {/* Dynamic Fields based on Product Type */}
+          {productType === "chicken" ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label>Category *</Label>
+                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v as any })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["broiler", "layer", "chick", "egg", "other"].map((c) => (
+                      <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="breed">Breed (optional)</Label>
+                <Input id="breed" value={form.breed} onChange={(e) => setForm({ ...form, breed: e.target.value })} placeholder="E.g., Cobb 500" />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="breed">Breed (optional)</Label>
-              <Input id="breed" value={form.breed} onChange={(e) => setForm({ ...form, breed: e.target.value })} />
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="brand">Brand *</Label>
+                <Input id="brand" required={productType === "feed"} value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="E.g., Suguna Feed" />
+              </div>
+              <div>
+                <Label htmlFor="specifications">Specifications (optional)</Label>
+                <Input id="specifications" value={form.specifications} onChange={(e) => setForm({ ...form, specifications: e.target.value })} placeholder="Protein: 21%, Fiber: 5%" />
+              </div>
             </div>
-          </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <Label htmlFor="quantity">Quantity</Label>
+              <Label htmlFor="quantity">Quantity (Stock) *</Label>
               <Input id="quantity" type="number" min={0} required value={form.quantity} onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })} />
             </div>
             <div>
-              <Label>Unit</Label>
+              <Label>Unit *</Label>
               <Select value={form.unit} onValueChange={(v) => setForm({ ...form, unit: v })}>
                 <SelectTrigger><SelectValue placeholder="Select unit" /></SelectTrigger>
                 <SelectContent>
-                  {["Bird", "Crate", "Kg"].map((u) => (
-                    <SelectItem key={u} value={u}>{u}</SelectItem>
-                  ))}
+                  {productType === "chicken" ? (
+                    ["Bird", "Crate", "Kg", "Other"].map((u) => (
+                      <SelectItem key={u} value={u}>{u}</SelectItem>
+                    ))
+                  ) : (
+                    ["Bag", "Kg", "Gram", "Tonne"].map((u) => (
+                      <SelectItem key={u} value={u}>{u}</SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="price">Your price (per unit)</Label>
+              <Label htmlFor="price">Asking Price (per unit) *</Label>
               <Input id="price" type="number" min="0.01" step="0.01" required value={form.farmer_price} onChange={(e) => setForm({ ...form, farmer_price: e.target.value })} placeholder="Enter price" />
             </div>
           </div>
+
           <div>
-            <Label htmlFor="location">Location</Label>
-            <Input id="location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Ibadan, Oyo State" />
+            <Label htmlFor="location">Location *</Label>
+            <Input id="location" required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Village, City, or District" />
           </div>
+
           <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea id="description" rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Tell buyers about your birds — diet, age, health, anything special." />
+            <Label htmlFor="description">Description (optional)</Label>
+            <Textarea id="description" rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={productType === "chicken" ? "Diet, age, vaccination schedule..." : "Key ingredients, feeding guidelines..."} />
           </div>
+
+          {/* Featured Banner Switch - Admin Only */}
+          {isAdmin && (
+            <div className="flex items-center justify-between p-4 rounded-xl border border-border/80 bg-secondary/10">
+              <div>
+                <Label htmlFor="is_featured_banner" className="font-bold text-foreground">Featured Banner</Label>
+                <p className="text-xs text-muted-foreground">Show this listing in the marketplace hero promotion slides</p>
+              </div>
+              <Switch
+                id="is_featured_banner"
+                checked={form.is_featured_banner}
+                onCheckedChange={(checked) => setForm({ ...form, is_featured_banner: checked })}
+              />
+            </div>
+          )}
+
           <div>
             <Label>Listing Images</Label>
             <div className="mt-2 flex flex-wrap gap-3">
-              {imageUrls.map((url, i) => (
+              {images.map((img, i) => (
                 <div key={i} className="relative h-20 w-20 overflow-hidden rounded-xl border border-border">
-                  <img src={url} className="h-full w-full object-cover" />
+                  <img src={img.secure_url} className="h-full w-full object-cover" />
                   <button
                     type="button"
-                    onClick={() => setImageUrls(imageUrls.filter((_, idx) => idx !== i))}
+                    onClick={() => setImages(images.filter((_, idx) => idx !== i))}
                     className="absolute right-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
                   >
                     <X className="h-3 w-3" />
                   </button>
                 </div>
               ))}
-              {imageUrls.length < 8 && (
+              {images.length < 8 && (
                 <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border hover:bg-secondary/50">
                   <Upload className="h-5 w-5 text-muted-foreground" />
                   <span className="mt-1 text-[10px] text-muted-foreground font-medium">Upload</span>
@@ -185,9 +296,10 @@ function NewListing() {
             </div>
             {uploading && <p className="mt-1 text-xs text-muted-foreground">Uploading image...</p>}
           </div>
+
           <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="ghost" asChild><Link to="/farmer">Cancel</Link></Button>
-            <Button type="submit" variant="hero" disabled={submitting}>{submitting ? "Submitting…" : "Submit listing"}</Button>
+            <Button type="button" variant="ghost" asChild><Link to={dashboardLink}>Cancel</Link></Button>
+            <Button type="submit" variant="hero" disabled={submitting}>{submitting ? "Submitting…" : "Submit Listing"}</Button>
           </div>
         </form>
       </main>

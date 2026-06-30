@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -20,17 +21,53 @@ export const Route = createFileRoute("/_authenticated/marketplace/")({
   component: MarketplacePage,
 });
 
-const CATEGORIES = ["all", "broiler", "layer", "chick", "egg", "other"] as const;
+const CATEGORIES = ["all", "broiler", "layer", "chick", "egg", "feed", "other"] as const;
+const SELLER_TYPES = ["all", "farmer", "admin"] as const;
 
 function MarketplacePage() {
   useRequireRole(["buyer", "admin"]);
   const [category, setCategory] = useState<string>("all");
+  const [sellerType, setSellerType] = useState<string>("all");
   const [search, setSearch] = useState("");
   const fn = useServerFn(listMarketplace);
   const q = useQuery({
     queryKey: ["marketplace", category, search],
     queryFn: () => fn({ data: { category, search } }),
   });
+
+  const rawListings = q.data ?? [];
+  
+  // Client-side seller filtering
+  const filteredListings = rawListings.filter((l: any) => {
+    const isSellerAdmin = l.farmer_id?.roles?.includes("admin");
+    if (sellerType === "admin") return isSellerAdmin;
+    if (sellerType === "farmer") return !isSellerAdmin;
+    return true;
+  });
+
+  // Filter listings marked as featured banners
+  const featuredBanners = rawListings.filter(
+    (l: any) => l.is_featured_banner === true && l.status === "live"
+  );
+
+  const [activeBannerIdx, setActiveBannerIdx] = useState(0);
+
+  // Auto scroll banners
+  useEffect(() => {
+    if (featuredBanners.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveBannerIdx((prev) => (prev + 1) % featuredBanners.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [featuredBanners.length]);
+
+  const handlePrevBanner = () => {
+    setActiveBannerIdx((prev) => (prev - 1 + featuredBanners.length) % featuredBanners.length);
+  };
+
+  const handleNextBanner = () => {
+    setActiveBannerIdx((prev) => (prev + 1) % featuredBanners.length);
+  };
 
   return (
     <div className="min-h-screen">
@@ -51,54 +88,170 @@ function MarketplacePage() {
                 className="w-64 pl-9"
               />
             </div>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground">Category:</span>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground">Seller:</span>
+              <Select value={sellerType} onValueChange={setSellerType}>
+                <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {SELLER_TYPES.map((s) => (
+                    <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
+        {/* Featured Banners Slider */}
+        {!q.isLoading && featuredBanners.length > 0 && (
+          <div className="mt-8 relative overflow-hidden rounded-3xl border border-border bg-gradient-to-r from-primary/10 via-primary/5 to-background shadow-soft group/banner">
+            <div 
+              className="flex transition-transform duration-700 ease-out"
+              style={{ transform: `translateX(-${activeBannerIdx * 100}%)` }}
+            >
+              {featuredBanners.map((b: any) => (
+                <div key={b.id} className="w-full flex-shrink-0 grid md:grid-cols-2 gap-6 p-8 md:p-12 items-center">
+                  <div className="space-y-4">
+                    <span className="inline-block bg-primary/20 text-primary border border-primary/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                      Featured {b.category === "feed" ? "Feed" : "Chicken"}
+                    </span>
+                    <h2 className="font-display text-3xl md:text-4xl font-extrabold text-foreground tracking-tight leading-tight">
+                      {b.title}
+                    </h2>
+                    {b.brand && (
+                      <p className="text-sm font-semibold text-muted-foreground">
+                        Brand: {b.brand}
+                      </p>
+                    )}
+                    <p className="text-sm text-foreground/80 line-clamp-3 leading-relaxed max-w-md">
+                      {b.description || "Fresh stock listed on the marketplace. Vetted and ready to purchase with secure payment options."}
+                    </p>
+                    <div className="pt-2 flex items-baseline gap-3">
+                      <span className="font-display text-3xl font-extrabold text-primary">
+                        {formatPrice(b.buyer_price)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">per {b.unit}</span>
+                    </div>
+                    <div className="pt-4">
+                      <Button asChild variant="hero" className="rounded-xl font-bold">
+                        <Link to="/marketplace/$id" params={{ id: b.id }}>
+                          Buy Now <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="h-64 md:h-80 w-full overflow-hidden rounded-2xl border border-border/80 bg-secondary/30 relative flex items-center justify-center">
+                    {b.image_urls?.[0] ? (
+                      <img src={b.image_urls[0]} alt={b.title} className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="text-8xl select-none">{b.category === "feed" ? "🌾" : "🐓"}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Slider Controls */}
+            {featuredBanners.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={handlePrevBanner}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full border border-border bg-card/85 text-foreground flex items-center justify-center shadow hover:bg-card transition opacity-0 group-hover/banner:opacity-100"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextBanner}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full border border-border bg-card/85 text-foreground flex items-center justify-center shadow hover:bg-card transition opacity-0 group-hover/banner:opacity-100"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {featuredBanners.map((_: any, idx: number) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveBannerIdx(idx)}
+                      className={`h-1.5 rounded-full transition-all ${
+                        activeBannerIdx === idx ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/30"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Listings Grid */}
         {q.isLoading ? (
           <div className="mt-12 text-center text-muted-foreground">Loading listings…</div>
-        ) : (q.data ?? []).length === 0 ? (
+        ) : filteredListings.length === 0 ? (
           <div className="mt-16 rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-            <p className="font-display text-xl text-foreground">No listings yet</p>
-            <p className="mt-2 text-sm text-muted-foreground">Check back soon — new birds are listed daily.</p>
+            <p className="font-display text-xl text-foreground">No listings found</p>
+            <p className="mt-2 text-sm text-muted-foreground">Try adjusting your search or filters.</p>
           </div>
         ) : (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {(q.data ?? []).map((l: any) => (
-              <Link
-                key={l.id}
-                to="/marketplace/$id"
-                params={{ id: l.id }}
-                className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-card"
-              >
-                <div className="aspect-[4/3] overflow-hidden bg-secondary">
-                  {l.image_urls?.[0] ? (
-                    <img src={l.image_urls[0]} alt={l.title} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
-                  ) : (
-                    <div className="grid h-full place-items-center font-display text-3xl text-primary/30">🐓</div>
-                  )}
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs capitalize text-secondary-foreground">{l.category}</span>
-                    <span className="text-xs text-muted-foreground">{l.quantity} {l.unit}</span>
+            {filteredListings.map((l: any) => {
+              const isAdminSeller = l.farmer_id?.roles?.includes("admin");
+              return (
+                <Link
+                  key={l.id}
+                  to="/marketplace/$id"
+                  params={{ id: l.id }}
+                  className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-card"
+                >
+                  <div className="aspect-[4/3] overflow-hidden bg-secondary relative">
+                    {l.image_urls?.[0] ? (
+                      <img src={l.image_urls[0]} alt={l.title} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+                    ) : (
+                      <div className="grid h-full place-items-center font-display text-3xl text-primary/30">
+                        {l.category === "feed" ? "🌾" : "🐓"}
+                      </div>
+                    )}
+                    
+                    {/* Seller Type Badge on Image */}
+                    <div className="absolute top-3 left-3">
+                      <span className={`rounded-lg px-2.5 py-1 text-[10px] font-bold tracking-wide uppercase shadow-sm border ${
+                        isAdminSeller 
+                          ? "bg-primary text-primary-foreground border-primary" 
+                          : "bg-background text-foreground border-border"
+                      }`}>
+                        {isAdminSeller ? "Admin Seller" : "Farmer Seller"}
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="mt-3 font-display text-lg font-semibold text-foreground line-clamp-1">{l.title}</h3>
-                  {l.location && <div className="text-xs text-muted-foreground">{l.location}</div>}
-                  <div className="mt-4 flex items-baseline justify-between">
-                    <div className="font-display text-2xl font-semibold text-primary">{formatPrice(l.buyer_price)}</div>
-                    <span className="text-xs text-accent">per {l.unit}</span>
+                  <div className="p-5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs capitalize text-secondary-foreground">{l.category}</span>
+                      <span className="text-xs text-muted-foreground">{l.quantity} {l.unit}</span>
+                    </div>
+                    <h3 className="mt-3 font-display text-lg font-semibold text-foreground line-clamp-1">{l.title}</h3>
+                    {l.location && <div className="text-xs text-muted-foreground">{l.location}</div>}
+                    <div className="mt-4 flex items-baseline justify-between">
+                      <div className="font-display text-2xl font-semibold text-primary">{formatPrice(l.buyer_price)}</div>
+                      <span className="text-xs text-accent">per {l.unit}</span>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         )}
       </main>

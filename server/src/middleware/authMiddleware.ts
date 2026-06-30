@@ -62,7 +62,7 @@ export const requireApproved = (
   res: Response,
   next: NextFunction
 ): any => {
-  if (req.user && req.user.status === "approved") {
+  if (req.user && (req.user.status === "approved" || req.user.roles.includes("admin"))) {
     return next();
   }
   return res.status(403).json({ message: "Access forbidden, account not approved" });

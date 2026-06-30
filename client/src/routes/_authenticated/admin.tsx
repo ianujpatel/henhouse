@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Users, Tags, ShoppingBag, BarChart3 } from "lucide-react";
+import { Users, Tags, ShoppingBag, BarChart3, Wheat, Layers, Award, Image } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { adminAnalytics, adminGetSettings, adminUpdateSettings } from "@/lib/admin.functions";
 import { useRequireRole } from "@/hooks/use-require-role";

@@ -17,6 +17,12 @@ export interface IOrder extends Document {
   delivery_district?: string;
   delivery_pincode?: string;
   delivery_notes?: string;
+  // Razorpay Payment Fields
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
+  razorpay_signature?: string;
+  payment_status: "pending" | "paid" | "failed";
+  payment_method?: string;
 }
 
 const OrderSchema: Schema = new Schema(
@@ -39,6 +45,16 @@ const OrderSchema: Schema = new Schema(
     delivery_district: { type: String },
     delivery_pincode: { type: String },
     delivery_notes: { type: String },
+    // Razorpay Integration
+    razorpay_order_id: { type: String },
+    razorpay_payment_id: { type: String },
+    razorpay_signature: { type: String },
+    payment_status: {
+      type: String,
+      enum: ["pending", "paid", "failed"],
+      default: "pending",
+    },
+    payment_method: { type: String },
   },
   {
     timestamps: { createdAt: "placed_at", updatedAt: "updated_at" },
