@@ -17,6 +17,7 @@ export interface IListing extends Document {
   specifications?: string;
   images: { public_id: string; secure_url: string; }[];
   image_urls: string[];
+  target_audience: "buyer" | "farmer" | "both";
   created_at: Date;
   updated_at: Date;
 }
@@ -55,6 +56,11 @@ const ListingSchema: Schema = new Schema(
     brand: { type: String, trim: true },
     is_featured_banner: { type: Boolean, default: false },
     specifications: { type: String, trim: true },
+    target_audience: {
+      type: String,
+      enum: ["buyer", "farmer", "both"],
+      default: "both",
+    },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

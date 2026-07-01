@@ -132,4 +132,22 @@ export const auth = {
       return { data: { user: null }, error: err };
     }
   },
+
+  forgotPassword: async (email: string) => {
+    try {
+      const res = await api.post("/api/auth/forgot-password", { email });
+      return { data: res.data, error: null };
+    } catch (err: any) {
+      return { data: null, error: err.response?.data || { message: err.message } };
+    }
+  },
+
+  resetPassword: async (token: string, password: string) => {
+    try {
+      const res = await api.post("/api/auth/reset-password", { token, password });
+      return { data: res.data, error: null };
+    } catch (err: any) {
+      return { data: null, error: err.response?.data || { message: err.message } };
+    }
+  },
 };

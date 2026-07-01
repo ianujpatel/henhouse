@@ -51,7 +51,7 @@ export function AppHeader() {
 
   const links: Array<{ to: string; label: string }> = [];
   if (approved) {
-    if (isBuyer || isAdmin) links.push({ to: "/marketplace", label: "Marketplace" });
+    if (isBuyer || isAdmin || isFarmer) links.push({ to: "/marketplace", label: "Marketplace" });
     if (isBuyer) links.push({ to: "/orders", label: "My Orders" });
     if (isFarmer) links.push({ to: "/farmer", label: "Farmer Dashboard" });
     if (isAdmin) links.push({ to: "/admin", label: "Admin" });

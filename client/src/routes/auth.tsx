@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/radio-group";
 
 const searchSchema = z.object({
-  mode: z.enum(["signin", "signup"]).optional(),
+  mode: z.enum(["signin", "signup", "forgot"]).optional(),
   role: z.enum(["farmer", "buyer"]).optional(),
 });
 
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const { mode: initialMode, role: initialRole } = Route.useSearch();
-  const [mode, setMode] = useState<"signin" | "signup">(initialMode ?? "signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">(initialMode ?? "signin");
   const [role, setRole] = useState<"farmer" | "buyer">(initialRole ?? "buyer");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,7 +50,12 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (mode === "signup") {
+      if (mode === "forgot") {
+        const { error } = await auth.forgotPassword(email);
+        if (error) throw error;
+        toast.success("Password reset link sent to your email");
+        setMode("signin");
+      } else if (mode === "signup") {
         const { error } = await auth.signUp({
           email,
           password,
@@ -110,15 +115,15 @@ function AuthPage() {
             </Link>
           </div>
           <h2 className="font-display text-3xl font-semibold text-foreground">
-            {mode === "signup" ? "Create your account" : "Welcome back"}
+            {mode === "signup" ? "Create your account" : mode === "forgot" ? "Forgot Password" : "Welcome back"}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             {mode === "signup"
               ? "New accounts are reviewed by an admin before access is granted."
+              : mode === "forgot"
+              ? "Enter your email to receive a secure password reset link."
               : "Sign in to access your marketplace."}
           </p>
-
-
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
@@ -165,31 +170,56 @@ function AuthPage() {
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+            {mode !== "forgot" && (
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            )}
+            {mode === "signin" && (
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => setMode("forgot")}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            )}
             <Button type="submit" className="w-full" variant="hero" size="lg" disabled={loading}>
-              {loading ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
+              {loading ? "Please wait…" : mode === "signup" ? "Create account" : mode === "forgot" ? "Send Reset Link" : "Sign in"}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button
-              type="button"
-              onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
-              className="font-medium text-primary hover:underline"
-            >
-              {mode === "signup" ? "Sign in" : "Create one"}
-            </button>
+            {mode === "forgot" ? (
+              <button
+                type="button"
+                onClick={() => setMode("signin")}
+                className="font-medium text-primary hover:underline"
+              >
+                Back to Sign In
+              </button>
+            ) : (
+              <>
+                {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+                  className="font-medium text-primary hover:underline"
+                >
+                  {mode === "signup" ? "Sign in" : "Create one"}
+                </button>
+              </>
+            )}
           </p>
         </div>
       </div>

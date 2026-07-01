@@ -8,6 +8,8 @@ export interface IUser extends Document {
   farm_name?: string;
   status: "pending" | "approved" | "rejected";
   roles: Array<"admin" | "farmer" | "buyer">;
+  reset_password_token?: string;
+  reset_password_expires?: Date;
   created_at: Date;
   updated_at: Date;
 }
@@ -21,6 +23,8 @@ const UserSchema: Schema = new Schema(
     farm_name: { type: String },
     status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
     roles: { type: [String], enum: ["admin", "farmer", "buyer"], default: ["buyer"] },
+    reset_password_token: { type: String },
+    reset_password_expires: { type: Date },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

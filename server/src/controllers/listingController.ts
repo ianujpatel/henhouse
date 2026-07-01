@@ -21,9 +21,10 @@ export const createListing = async (req: AuthRequest, res: Response): Promise<an
       return res.status(403).json({ message: "Forbidden: Account not approved" });
     }
 
-    const { title, category, breed, quantity, unit, farmer_price, location, description, images, status, brand, is_featured_banner, specifications } = req.body;
+    const { title, category, breed, quantity, unit, farmer_price, location, description, images, status, brand, is_featured_banner, specifications, target_audience } = req.body;
 
     const isAdmin = req.user.roles.includes("admin");
+    const finalFarmerPrice = isAdmin ? (Number(farmer_price) || 0) : 0;
 
     const listing = await Listing.create({
       farmer_id: req.user.id,
@@ -32,8 +33,8 @@ export const createListing = async (req: AuthRequest, res: Response): Promise<an
       breed,
       quantity,
       unit: unit || "bird",
-      farmer_price,
-      buyer_price: isAdmin ? (req.body.buyer_price || farmer_price) : undefined,
+      farmer_price: finalFarmerPrice,
+      buyer_price: isAdmin ? (req.body.buyer_price || finalFarmerPrice) : undefined,
       location,
       description,
       images: images || [],
@@ -41,6 +42,7 @@ export const createListing = async (req: AuthRequest, res: Response): Promise<an
       brand,
       is_featured_banner: is_featured_banner || false,
       specifications,
+      target_audience: target_audience || "both",
     });
 
     // Notify admins if pending pricing
@@ -77,8 +79,14 @@ export const updateListing = async (req: AuthRequest, res: Response): Promise<an
     const { id } = req.params;
     const patch = req.body;
 
+    const isAdmin = req.user.roles.includes("admin");
+    if (!isAdmin) {
+      delete patch.farmer_price;
+      delete patch.buyer_price;
+    }
+
     let query: any = { _id: id };
-    if (!req.user.roles.includes("admin")) {
+    if (!isAdmin) {
       query.farmer_id = req.user.id;
     }
 
@@ -189,12 +197,27 @@ export const listMyListings = async (req: AuthRequest, res: Response): Promise<a
 // Buyer marketplace: never returns farmer_price, populates farmer_id roles
 export const listMarketplace = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
     const { category, search } = req.query;
 
     const query: any = {
       status: "live",
       quantity: { $gt: 0 },
     };
+
+    if (!req.user.roles.includes("admin")) {
+      const allowedAudiences: string[] = ["both"];
+      if (req.user.roles.includes("buyer")) {
+        allowedAudiences.push("buyer");
+      }
+      if (req.user.roles.includes("farmer")) {
+        allowedAudiences.push("farmer");
+      }
+      query.target_audience = { $in: allowedAudiences };
+    }
 
     if (category && category !== "all") {
       query.category = category;
@@ -206,7 +229,7 @@ export const listMarketplace = async (req: AuthRequest, res: Response): Promise<
 
     const listings = await Listing.find(query)
       .populate("farmer_id", "roles farm_name full_name")
-      .select("id title category breed quantity unit buyer_price location images image_urls brand is_featured_banner specifications created_at farmer_id")
+      .select("id title category breed quantity unit buyer_price location images image_urls brand is_featured_banner specifications target_audience created_at farmer_id")
       .sort({ created_at: -1 });
 
     return res.json(listings);
@@ -218,11 +241,27 @@ export const listMarketplace = async (req: AuthRequest, res: Response): Promise<
 
 export const getListingForBuyer = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
     const { id } = req.params;
 
-    const listing = await Listing.findOne({ _id: id, status: "live" })
+    const query: any = { _id: id, status: "live" };
+    if (!req.user.roles.includes("admin")) {
+      const allowedAudiences: string[] = ["both"];
+      if (req.user.roles.includes("buyer")) {
+        allowedAudiences.push("buyer");
+      }
+      if (req.user.roles.includes("farmer")) {
+        allowedAudiences.push("farmer");
+      }
+      query.target_audience = { $in: allowedAudiences };
+    }
+
+    const listing = await Listing.findOne(query)
       .populate("farmer_id", "roles farm_name full_name")
-      .select("id title category breed quantity unit buyer_price location description images image_urls brand is_featured_banner specifications created_at farmer_id");
+      .select("id title category breed quantity unit buyer_price location description images image_urls brand is_featured_banner specifications target_audience created_at farmer_id");
 
     if (!listing) {
       return res.status(404).json({ message: "Listing not available" });

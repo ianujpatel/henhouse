@@ -61,6 +61,7 @@ function EditListing() {
         brand: listing.brand ?? "",
         is_featured_banner: listing.is_featured_banner ?? false,
         specifications: listing.specifications ?? "",
+        target_audience: listing.target_audience ?? "both",
       });
       setImages(listing.images ?? []);
     }
@@ -104,6 +105,10 @@ function EditListing() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (isAdmin && (Number(form.farmer_price) <= 0 || Number.isNaN(Number(form.farmer_price)))) {
+      toast.error("Please enter a valid positive price.");
+      return;
+    }
     try {
       await updateFn({
         data: {
@@ -113,13 +118,14 @@ function EditListing() {
           breed: productType === "feed" ? null : (form.breed || null),
           quantity: Number(form.quantity),
           unit: form.unit,
-          farmer_price: Number(form.farmer_price),
+          farmer_price: isAdmin ? Number(form.farmer_price) : listing.farmer_price,
           location: form.location || null,
           description: form.description || null,
           images: images,
           brand: productType === "feed" ? form.brand : null,
           is_featured_banner: isAdmin ? form.is_featured_banner : false,
           specifications: productType === "feed" ? form.specifications : null,
+          target_audience: isAdmin ? form.target_audience : (listing.target_audience ?? "both"),
         },
       });
       toast.success("Listing updated");
@@ -222,7 +228,7 @@ function EditListing() {
             </div>
           )}
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className={`grid gap-4 ${isAdmin ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
             <div>
               <Label htmlFor="quantity">Quantity (Stock) *</Label>
               <Input id="quantity" type="number" min={0} value={form.quantity} onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })} />
@@ -244,10 +250,12 @@ function EditListing() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="price">Your Price (per unit) *</Label>
-              <Input id="price" type="number" min={0} step="0.01" value={form.farmer_price} onChange={(e) => setForm({ ...form, farmer_price: Number(e.target.value) })} />
-            </div>
+            {isAdmin && (
+              <div>
+                <Label htmlFor="price">Your Price (per unit) *</Label>
+                <Input id="price" type="number" min={0} step="0.01" value={form.farmer_price} onChange={(e) => setForm({ ...form, farmer_price: Number(e.target.value) })} />
+              </div>
+            )}
           </div>
 
           <div>
@@ -261,16 +269,36 @@ function EditListing() {
 
           {/* Featured Banner Switch - Admin Only */}
           {isAdmin && (
-            <div className="flex items-center justify-between p-4 rounded-xl border border-border/80 bg-secondary/10">
-              <div>
-                <Label htmlFor="is_featured_banner" className="font-bold text-foreground">Featured Banner</Label>
-                <p className="text-xs text-muted-foreground">Show this listing in the marketplace hero promotion slides</p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border/80 bg-secondary/10">
+                <div>
+                  <Label htmlFor="is_featured_banner" className="font-bold text-foreground">Featured Banner</Label>
+                  <p className="text-xs text-muted-foreground">Show this listing in the marketplace hero promotion slides</p>
+                </div>
+                <Switch
+                  id="is_featured_banner"
+                  checked={form.is_featured_banner}
+                  onCheckedChange={(checked) => setForm({ ...form, is_featured_banner: checked })}
+                />
               </div>
-              <Switch
-                id="is_featured_banner"
-                checked={form.is_featured_banner}
-                onCheckedChange={(checked) => setForm({ ...form, is_featured_banner: checked })}
-              />
+
+              <div className="space-y-2">
+                <Label htmlFor="target_audience" className="font-bold text-foreground">Target Audience</Label>
+                <Select
+                  value={form.target_audience}
+                  onValueChange={(v) => setForm({ ...form, target_audience: v as any })}
+                >
+                  <SelectTrigger id="target_audience" className="rounded-xl">
+                    <SelectValue placeholder="Select target audience" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="buyer">Buyer Only</SelectItem>
+                    <SelectItem value="farmer">Farmer Only</SelectItem>
+                    <SelectItem value="both">Buyer & Farmer</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground">Determine who can see this product listing in the marketplace.</p>
+              </div>
             </div>
           )}
 

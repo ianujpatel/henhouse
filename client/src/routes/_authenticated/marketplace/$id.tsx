@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/marketplace/$id")({
 });
 
 function ListingDetail() {
-  useRequireRole(["buyer", "admin"]);
+  useRequireRole(["buyer", "admin", "farmer"]);
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const getFn = useServerFn(getListingForBuyer);

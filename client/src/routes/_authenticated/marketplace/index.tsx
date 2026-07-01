@@ -25,7 +25,7 @@ const CATEGORIES = ["all", "broiler", "layer", "chick", "egg", "feed", "other"] 
 const SELLER_TYPES = ["all", "farmer", "admin"] as const;
 
 function MarketplacePage() {
-  useRequireRole(["buyer", "admin"]);
+  useRequireRole(["buyer", "admin", "farmer"]);
   const [category, setCategory] = useState<string>("all");
   const [sellerType, setSellerType] = useState<string>("all");
   const [search, setSearch] = useState("");

@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import User from "../models/User";
 import Settings from "../models/Settings";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { sendResetPasswordEmail } from "../config/mailer";
 
 const generateToken = (id: string) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || "henhouse_jwt_secret_key_123456", {
@@ -161,6 +163,74 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<an
     await user.save();
 
     return res.json({ ok: true });
+  } catch (error: any) {
+    console.error(error);
+    return res.status(500).json({ message: error.message || "Server Error" });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: "User with this email does not exist" });
+    }
+
+    // Generate token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.reset_password_token = resetToken;
+    user.reset_password_expires = new Date(Date.now() + 3600000); // 1 hour
+    await user.save();
+
+    // Send email
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+    
+    try {
+      await sendResetPasswordEmail(user.email, resetLink);
+      return res.json({ message: "Password reset link sent to your email" });
+    } catch (mailError: any) {
+      console.error("Mailer error:", mailError);
+      user.reset_password_token = undefined;
+      user.reset_password_expires = undefined;
+      await user.save();
+      return res.status(500).json({ message: "Could not send password reset email. Please try again." });
+    }
+  } catch (error: any) {
+    console.error(error);
+    return res.status(500).json({ message: error.message || "Server Error" });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).json({ message: "Token and password are required" });
+    }
+
+    const user = await User.findOne({
+      reset_password_token: token,
+      reset_password_expires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Password reset token is invalid or has expired" });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.reset_password_token = undefined;
+    user.reset_password_expires = undefined;
+    await user.save();
+
+    return res.json({ message: "Password has been reset successfully" });
   } catch (error: any) {
     console.error(error);
     return res.status(500).json({ message: error.message || "Server Error" });
