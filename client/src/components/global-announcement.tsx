@@ -97,7 +97,7 @@ export function GlobalAnnouncement() {
               )
             ) : (
               // Text Announcement Banner
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/20 text-primary">
                     <Sparkles className="h-4 w-4" />
@@ -111,7 +111,7 @@ export function GlobalAnnouncement() {
                     href={settings.banner_redirect_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow transition hover:bg-primary/90 hover:scale-102 active:scale-98"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow transition hover:bg-primary/90 hover:scale-102 active:scale-98 w-full sm:w-auto"
                   >
                     View <ArrowRight className="h-3.5 w-3.5" />
                   </a>
@@ -123,7 +123,7 @@ export function GlobalAnnouncement() {
 
         {/* Today's Price Section */}
         {showPrices && (
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border/80 bg-secondary/15 p-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 rounded-2xl border border-border/80 bg-secondary/15 p-4">
             <div className="flex items-center gap-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/20 text-accent-foreground">
                 <TrendingUp className="h-5 w-5 text-accent" />
@@ -137,9 +137,9 @@ export function GlobalAnnouncement() {
               </div>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6">
               {/* Chicks Price */}
-              <div className="flex items-baseline gap-2.5 rounded-xl bg-card border border-border/50 px-4 py-2 shadow-soft">
+              <div className="flex items-baseline gap-2.5 rounded-xl bg-card border border-border/50 px-4 py-2 shadow-soft flex-1 sm:flex-initial justify-center sm:justify-start">
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Chicks</span>
                 <span className="font-display text-lg font-black text-primary">
                   {formatPrice(settings.chicks_price)}
@@ -148,7 +148,7 @@ export function GlobalAnnouncement() {
               </div>
 
               {/* Birds Price */}
-              <div className="flex items-baseline gap-2.5 rounded-xl bg-card border border-border/50 px-4 py-2 shadow-soft">
+              <div className="flex items-baseline gap-2.5 rounded-xl bg-card border border-border/50 px-4 py-2 shadow-soft flex-1 sm:flex-initial justify-center sm:justify-start">
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Birds</span>
                 <span className="font-display text-lg font-black text-primary">
                   {formatPrice(settings.birds_price)}

@@ -297,8 +297,8 @@ function OrdersPage() {
                 </div>
 
                 {/* Items Invoice Table */}
-                <div className="border border-border/80 rounded-2xl overflow-hidden bg-secondary/10">
-                  <table className="w-full text-left text-xs border-collapse">
+                <div className="border border-border/80 rounded-2xl overflow-hidden bg-secondary/10 overflow-x-auto w-full">
+                  <table className="w-full text-left text-xs border-collapse min-w-[500px]">
                     <thead>
                       <tr className="bg-secondary/40 border-b border-border/80">
                         <th className="p-3 font-bold text-muted-foreground">Item Description</th>

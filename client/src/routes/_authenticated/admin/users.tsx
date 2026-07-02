@@ -37,8 +37,8 @@ function AdminUsers() {
   const users = q.data ?? [];
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
-      <table className="w-full text-sm">
+    <div className="overflow-hidden overflow-x-auto w-full rounded-2xl border border-border bg-card shadow-soft">
+      <table className="w-full text-sm min-w-[700px]">
         <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-5 py-3">Name</th>

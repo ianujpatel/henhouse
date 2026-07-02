@@ -93,8 +93,8 @@ function AdminManageListings() {
         </div>
       </div>
 
-      <div className="border border-border/80 rounded-2xl overflow-hidden">
-        <table className="w-full text-left text-xs border-collapse">
+      <div className="border border-border/80 rounded-2xl overflow-hidden overflow-x-auto w-full">
+        <table className="w-full text-left text-xs border-collapse min-w-[900px]">
           <thead>
             <tr className="bg-secondary/40 border-b border-border/80">
               <th className="p-3 font-bold text-muted-foreground">Listing Info</th>

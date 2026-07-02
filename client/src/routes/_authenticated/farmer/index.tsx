@@ -65,8 +65,8 @@ function FarmerDashboard() {
         ) : pendingOrders.length === 0 ? (
           <div className="mt-4 text-sm text-muted-foreground bg-secondary/35 p-4 rounded-xl border border-border">No pending orders.</div>
         ) : (
-          <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
-            <table className="w-full text-sm">
+          <div className="mt-4 overflow-hidden overflow-x-auto w-full rounded-2xl border border-border bg-card shadow-soft">
+            <table className="w-full text-sm min-w-[600px]">
               <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="px-5 py-3">Date</th>
@@ -97,8 +97,8 @@ function FarmerDashboard() {
         ) : placedOrders.length === 0 ? (
           <div className="mt-4 text-sm text-muted-foreground bg-secondary/35 p-4 rounded-xl border border-border">No placed orders yet.</div>
         ) : (
-          <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
-            <table className="w-full text-sm">
+          <div className="mt-4 overflow-hidden overflow-x-auto w-full rounded-2xl border border-border bg-card shadow-soft">
+            <table className="w-full text-sm min-w-[800px]">
               <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="px-5 py-3">Date</th>
@@ -142,8 +142,8 @@ function FarmerDashboard() {
         ) : fulfilledOrders.length === 0 ? (
           <div className="mt-4 text-sm text-muted-foreground bg-secondary/35 p-4 rounded-xl border border-border">No fulfilled orders yet.</div>
         ) : (
-          <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
-            <table className="w-full text-sm">
+          <div className="mt-4 overflow-hidden overflow-x-auto w-full rounded-2xl border border-border bg-card shadow-soft">
+            <table className="w-full text-sm min-w-[800px]">
               <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="px-5 py-3">Date</th>

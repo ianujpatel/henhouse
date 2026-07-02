@@ -175,7 +175,7 @@ function MarketplacePage() {
               style={{ transform: `translateX(-${activeBannerIdx * 100}%)` }}
             >
               {featuredBanners.map((b: any) => (
-                <div key={b.id} className="w-full flex-shrink-0 grid md:grid-cols-2 gap-6 p-8 md:p-12 items-center">
+                <div key={b.id} className="w-full flex-shrink-0 grid md:grid-cols-2 gap-6 p-4 sm:p-8 md:p-12 items-center">
                   <div className="space-y-4">
                     <span className="inline-block bg-primary/20 text-primary border border-primary/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                       Featured {b.category === "feed" ? "Feed" : "Chicken"}
@@ -235,7 +235,7 @@ function MarketplacePage() {
                       </div>
                     )}
                   </div>
-                  <div className="h-64 md:h-80 w-full overflow-hidden rounded-2xl border border-border/80 bg-secondary/30 relative flex items-center justify-center">
+                  <div className="h-48 sm:h-64 md:h-80 w-full overflow-hidden rounded-2xl border border-border/80 bg-secondary/30 relative flex items-center justify-center">
                     {b.image_urls?.[0] ? (
                       <img src={b.image_urls[0]} alt={b.title} className="h-full w-full object-cover" />
                     ) : (
@@ -252,14 +252,14 @@ function MarketplacePage() {
                 <button
                   type="button"
                   onClick={handlePrevBanner}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full border border-border bg-card/85 text-foreground flex items-center justify-center shadow hover:bg-card transition opacity-0 group-hover/banner:opacity-100"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full border border-border bg-card/85 text-foreground flex items-center justify-center shadow hover:bg-card transition opacity-100 sm:opacity-0 sm:group-hover/banner:opacity-100"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
                 <button
                   type="button"
                   onClick={handleNextBanner}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full border border-border bg-card/85 text-foreground flex items-center justify-center shadow hover:bg-card transition opacity-0 group-hover/banner:opacity-100"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full border border-border bg-card/85 text-foreground flex items-center justify-center shadow hover:bg-card transition opacity-100 sm:opacity-0 sm:group-hover/banner:opacity-100"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
