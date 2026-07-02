@@ -1,7 +1,7 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Users, Tags, ShoppingBag, BarChart3, Wheat, Layers, Award, Image } from "lucide-react";
+import { Users, Tags, ShoppingBag, BarChart3, Wheat, Layers, Award, Image, Settings, Megaphone } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { adminAnalytics, adminGetSettings, adminUpdateSettings } from "@/lib/admin.functions";
 import { useRequireRole } from "@/hooks/use-require-role";
@@ -16,12 +16,21 @@ export const Route = createFileRoute("/_authenticated/admin")({
 const TABS = [
   { to: "/admin", label: "Overview", icon: BarChart3, exact: true },
   { to: "/admin/users", label: "Users", icon: Users },
-  { to: "/admin/listings", label: "Listings", icon: Tags },
+  { to: "/admin/manage-listings", label: "Manage Listings", icon: Settings },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { to: "/admin/settings", label: "Global Settings", icon: Megaphone },
 ];
+
 
 function AdminLayout() {
   useRequireRole(["admin"]);
+  const location = useLocation();
+  const isStandalone = location.pathname.includes("chicks-sell") || location.pathname.includes("feed-sell");
+
+  if (isStandalone) {
+    return <Outlet />;
+  }
+
   const qc = useQueryClient();
   const fn = useServerFn(adminAnalytics);
   const getSettingsFn = useServerFn(adminGetSettings);
@@ -92,6 +101,34 @@ function AdminLayout() {
           <Stat label="Orders" value={(a?.counts.orders ?? 0).toString()} />
           <Stat label="Gross revenue" value={formatPrice(a?.revenue ?? 0)} />
         </div>
+
+        <div className="mt-6 flex flex-wrap gap-4">
+          <Link
+            to="/admin/chicks-sell"
+            className="inline-flex items-center gap-2 rounded-2xl border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground hover:bg-secondary/40 shadow-soft transition-all hover:scale-102"
+          >
+            <Tags className="h-4 w-4 text-primary" /> Chicken Listings
+          </Link>
+          <Link
+            to="/admin/feed-sell"
+            className="inline-flex items-center gap-2 rounded-2xl border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground hover:bg-secondary/40 shadow-soft transition-all hover:scale-102"
+          >
+            <Wheat className="h-4 w-4 text-primary" /> Feed Listings
+          </Link>
+          <Link
+            to="/admin/manage-listings"
+            className="inline-flex items-center gap-2 rounded-2xl border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground hover:bg-secondary/40 shadow-soft transition-all hover:scale-102"
+          >
+            <Settings className="h-4 w-4 text-primary" /> Manage Listings
+          </Link>
+          <Link
+            to="/admin/settings"
+            className="inline-flex items-center gap-2 rounded-2xl border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground hover:bg-secondary/40 shadow-soft transition-all hover:scale-102"
+          >
+            <Megaphone className="h-4 w-4 text-primary" /> Global Settings
+          </Link>
+        </div>
+
 
         <nav className="mt-10 flex flex-wrap gap-2 border-b border-border">
           {TABS.map((t) => (

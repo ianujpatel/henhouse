@@ -14,6 +14,7 @@ import { getListingForBuyer } from "@/lib/listings.functions";
 import { useRequireRole } from "@/hooks/use-require-role";
 import { formatPrice } from "@/lib/format";
 import { useCart } from "@/hooks/use-cart";
+import { getMe } from "@/lib/me.functions";
 
 export const Route = createFileRoute("/_authenticated/marketplace/$id")({
   component: ListingDetail,
@@ -26,7 +27,12 @@ function ListingDetail() {
   const getFn = useServerFn(getListingForBuyer);
   const q = useQuery({ queryKey: ["listing", id], queryFn: () => getFn({ data: { id } }) });
   
-  const { addToCart } = useCart();
+  const { addToCart, items } = useCart();
+  const meFn = useServerFn(getMe);
+  const meQ = useQuery({ queryKey: ["me"], queryFn: () => meFn(), retry: false });
+  const isAdmin = meQ.data?.roles?.includes("admin") ?? false;
+  
+  const isItemInCart = items.some(item => item.listing_id === id || item.feed_product_id === id);
   const [qty, setQty] = useState(1);
   const [activeImgIdx, setActiveImgIdx] = useState(0);
   
@@ -326,24 +332,37 @@ function ListingDetail() {
               </div>
 
               {/* Actions Grid */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="rounded-2xl font-bold h-12 border-border/85 hover:bg-secondary/40 shadow-sm" 
-                  onClick={() => handleAddToCart(false)}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart
-                </Button>
-                <Button 
-                  variant="hero" 
-                  size="lg" 
-                  className="rounded-2xl font-bold h-12 shadow-soft hover:scale-102 transition-transform" 
-                  onClick={handleBuyNow}
-                >
-                  Buy Now
-                </Button>
-              </div>
+              {!isAdmin && (
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  {isItemInCart ? (
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="rounded-2xl font-bold h-12 border-primary text-primary hover:bg-primary/5 shadow-sm" 
+                      onClick={() => navigate({ to: "/cart" })}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" /> Go to Cart
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="rounded-2xl font-bold h-12 border-border/85 hover:bg-secondary/40 shadow-sm" 
+                      onClick={() => handleAddToCart(false)}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart
+                    </Button>
+                  )}
+                  <Button 
+                    variant="hero" 
+                    size="lg" 
+                    className="rounded-2xl font-bold h-12 shadow-soft hover:scale-102 transition-transform" 
+                    onClick={handleBuyNow}
+                  >
+                    Buy Now
+                  </Button>
+                </div>
+              )}
             </div>
 
           </div>
@@ -351,30 +370,43 @@ function ListingDetail() {
       </main>
 
       {/* Floating Sticky Actions Bar (Mobile Only) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-card/90 backdrop-blur px-4 py-3 shadow-lg z-40 flex items-center justify-between gap-4">
-        <div>
-          <div className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Total Cost</div>
-          <div className="font-display text-lg font-black text-foreground">{formatPrice(total)}</div>
+      {!isAdmin && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-card/90 backdrop-blur px-4 py-3 shadow-lg z-40 flex items-center justify-between gap-4">
+          <div>
+            <div className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Total Cost</div>
+            <div className="font-display text-lg font-black text-foreground">{formatPrice(total)}</div>
+          </div>
+          <div className="flex gap-2 flex-1 max-w-xs justify-end">
+            {isItemInCart ? (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-xl font-bold h-10 px-3 flex-shrink-0 border-primary text-primary hover:bg-primary/5"
+                onClick={() => navigate({ to: "/cart" })}
+              >
+                <ShoppingCart className="h-4 w-4 mr-1" /> Go to Cart
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-xl font-bold h-10 px-3 flex-shrink-0"
+                onClick={() => handleAddToCart(false)}
+              >
+                <ShoppingCart className="h-4 w-4" />
+              </Button>
+            )}
+            <Button 
+              variant="hero" 
+              size="sm" 
+              className="rounded-xl font-bold h-10 flex-1"
+              onClick={handleBuyNow}
+            >
+              Buy Now
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2 flex-1 max-w-xs justify-end">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="rounded-xl font-bold h-10 px-3 flex-shrink-0"
-            onClick={() => handleAddToCart(false)}
-          >
-            <ShoppingCart className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="hero" 
-            size="sm" 
-            className="rounded-xl font-bold h-10 flex-1"
-            onClick={handleBuyNow}
-          >
-            Buy Now
-          </Button>
-        </div>
-      </div>
+      )}
 
       {/* Fullscreen Lightbox Modal */}
       {isLightboxOpen && imageList[lightboxIndex] && (

@@ -24,6 +24,7 @@ import orderRoutes from "./routes/orderRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import feedRoutes from "./routes/feedRoutes";
+import globalSettingsRoutes from "./routes/globalSettingsRoutes";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/listings", listingRoutes);
@@ -31,6 +32,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/feeds", feedRoutes);
+app.use("/api/global-settings", globalSettingsRoutes);
+
 
 // Error Handling Middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

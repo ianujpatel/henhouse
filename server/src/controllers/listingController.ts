@@ -24,6 +24,9 @@ export const createListing = async (req: AuthRequest, res: Response): Promise<an
     const { title, category, breed, quantity, unit, farmer_price, location, description, images, status, brand, is_featured_banner, specifications, target_audience } = req.body;
 
     const isAdmin = req.user.roles.includes("admin");
+    if (!isAdmin && category === "feed") {
+      return res.status(403).json({ message: "Forbidden: Only admins can manage feed listings" });
+    }
     const finalFarmerPrice = isAdmin ? (Number(farmer_price) || 0) : 0;
 
     const listing = await Listing.create({
@@ -93,6 +96,10 @@ export const updateListing = async (req: AuthRequest, res: Response): Promise<an
     const listing = await Listing.findOne(query);
     if (!listing) {
       return res.status(404).json({ message: "Listing not found or not owned by you" });
+    }
+
+    if (!isAdmin && (patch.category === "feed" || listing.category === "feed")) {
+      return res.status(403).json({ message: "Forbidden: Only admins can manage feed listings" });
     }
 
     // Compare images to find removed ones and delete from Cloudinary

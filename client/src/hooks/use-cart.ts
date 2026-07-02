@@ -18,22 +18,36 @@ export interface CartItem {
 export function useCart() {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount and when event fires
   useEffect(() => {
-    const saved = localStorage.getItem("henhouse_cart");
-    if (saved) {
-      try {
-        setItems(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to load cart", e);
+    const loadCart = () => {
+      const saved = localStorage.getItem("henhouse_cart");
+      if (saved) {
+        try {
+          setItems(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to load cart", e);
+        }
+      } else {
+        setItems([]);
       }
-    }
+    };
+
+    loadCart();
+
+    window.addEventListener("henhouse_cart_updated", loadCart);
+    window.addEventListener("storage", loadCart);
+    return () => {
+      window.removeEventListener("henhouse_cart_updated", loadCart);
+      window.removeEventListener("storage", loadCart);
+    };
   }, []);
 
   // Save to localStorage when items change
   const saveCart = (newItems: CartItem[]) => {
     setItems(newItems);
     localStorage.setItem("henhouse_cart", JSON.stringify(newItems));
+    window.dispatchEvent(new Event("henhouse_cart_updated"));
   };
 
   const addToCart = (newItem: CartItem) => {

@@ -6,6 +6,8 @@ import { useState } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { GlobalAnnouncement } from "./global-announcement";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,10 +53,20 @@ export function AppHeader() {
 
   const links: Array<{ to: string; label: string }> = [];
   if (approved) {
-    if (isBuyer || isAdmin || isFarmer) links.push({ to: "/marketplace", label: "Marketplace" });
+    if (isBuyer || isAdmin) links.push({ to: "/marketplace", label: "Marketplace" });
     if (isBuyer) links.push({ to: "/orders", label: "My Orders" });
-    if (isFarmer) links.push({ to: "/farmer", label: "Farmer Dashboard" });
-    if (isAdmin) links.push({ to: "/admin", label: "Admin" });
+    if (isFarmer) {
+      links.push({ to: "/farmer", label: "Dashboard" });
+      links.push({ to: "/farmer/chicks-purchase", label: "Chicks Purchase" });
+      links.push({ to: "/farmer/feed-purchase", label: "Feed Purchase" });
+      links.push({ to: "/farmer/birds-sell", label: "Birds Sell" });
+    }
+    if (isAdmin) {
+      links.push({ to: "/admin", label: "Admin" });
+      links.push({ to: "/admin/chicks-sell", label: "Chicken Listings" });
+      links.push({ to: "/admin/feed-sell", label: "Feed Listings" });
+      links.push({ to: "/admin/manage-listings", label: "Manage Listings" });
+    }
   }
 
   const unread = (notifsQ.data ?? []).filter((n: any) => !n.read_at).length;
@@ -67,7 +79,9 @@ export function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+    <>
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+
       <div className="container mx-auto flex h-16 items-center gap-4 px-4">
         <Link to="/" className="flex items-center gap-2 font-display text-xl font-semibold text-primary">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-soft">
@@ -92,7 +106,7 @@ export function AppHeader() {
         <div className="ml-auto flex items-center gap-2">
           {me ? (
             <>
-              {isBuyer && (
+              {(isBuyer || isFarmer) && (
                 <Link
                   to="/cart"
                   className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground transition-colors shadow-soft"
@@ -212,5 +226,8 @@ export function AppHeader() {
         </div>
       </div>
     </header>
+    <GlobalAnnouncement />
+    </>
   );
 }
+

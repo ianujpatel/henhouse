@@ -6,53 +6,28 @@ import { Search, ChevronLeft, ChevronRight, ArrowRight, ShoppingCart } from "luc
 import { AppHeader } from "@/components/app-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { listMarketplace } from "@/lib/listings.functions";
 import { useRequireRole } from "@/hooks/use-require-role";
 import { formatPrice } from "@/lib/format";
 import { useCart } from "@/hooks/use-cart";
 import { toast } from "sonner";
-import { getMe } from "@/lib/me.functions";
 
-export const Route = createFileRoute("/_authenticated/marketplace/")({
-  component: MarketplacePage,
+export const Route = createFileRoute("/_authenticated/farmer/feed-purchase")({
+  component: FeedPurchasePage,
 });
 
-const CATEGORIES = ["all", "broiler", "layer", "chick", "egg", "feed", "other"] as const;
-const SELLER_TYPES = ["all", "farmer", "admin"] as const;
-
-function MarketplacePage() {
-  useRequireRole(["buyer", "admin", "farmer"]);
+function FeedPurchasePage() {
+  useRequireRole(["farmer"]);
   const navigate = useNavigate();
   const { addToCart, items } = useCart();
-  const [category, setCategory] = useState<string>("all");
-  const [sellerType, setSellerType] = useState<string>("all");
   const [search, setSearch] = useState("");
   const fn = useServerFn(listMarketplace);
   const q = useQuery({
-    queryKey: ["marketplace", category, search],
-    queryFn: () => fn({ data: { category: category === "all" ? undefined : category, search } }),
+    queryKey: ["feed-purchase", search],
+    queryFn: () => fn({ data: { category: "feed", search } }),
   });
-
-  const meFn = useServerFn(getMe);
-  const meQ = useQuery({ queryKey: ["me"], queryFn: () => meFn(), retry: false });
-  const isAdmin = meQ.data?.roles?.includes("admin") ?? false;
 
   const rawListings = q.data ?? [];
-  
-  // Client-side seller filtering
-  const filteredListings = rawListings.filter((l: any) => {
-    const isSellerAdmin = l.farmer_id?.roles?.includes("admin");
-    if (sellerType === "admin") return isSellerAdmin;
-    if (sellerType === "farmer") return !isSellerAdmin;
-    return true;
-  });
 
   // Filter listings marked as featured banners
   const featuredBanners = rawListings.filter(
@@ -127,8 +102,8 @@ function MarketplacePage() {
       <main className="container mx-auto px-4 py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-display text-4xl font-semibold text-primary">Marketplace</h1>
-            <p className="mt-1 text-muted-foreground">Vetted listings, transparent pricing.</p>
+            <h1 className="font-display text-4xl font-semibold text-primary">Feed Purchase</h1>
+            <p className="mt-1 text-muted-foreground">High-quality feed listings, transparent pricing.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <div className="relative">
@@ -139,30 +114,6 @@ function MarketplacePage() {
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-64 pl-9"
               />
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-muted-foreground">Category:</span>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-muted-foreground">Seller:</span>
-              <Select value={sellerType} onValueChange={setSellerType}>
-                <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {SELLER_TYPES.map((s) => (
-                    <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
         </div>
@@ -178,7 +129,7 @@ function MarketplacePage() {
                 <div key={b.id} className="w-full flex-shrink-0 grid md:grid-cols-2 gap-6 p-8 md:p-12 items-center">
                   <div className="space-y-4">
                     <span className="inline-block bg-primary/20 text-primary border border-primary/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                      Featured {b.category === "feed" ? "Feed" : "Chicken"}
+                      Featured Feed
                     </span>
                     <h2 className="font-display text-3xl md:text-4xl font-extrabold text-foreground tracking-tight leading-tight">
                       {b.title}
@@ -197,49 +148,45 @@ function MarketplacePage() {
                       </span>
                       <span className="text-xs text-muted-foreground">per {b.unit}</span>
                     </div>
-                    
-                    {/* Hide action buttons for Admin */}
-                    {!isAdmin && (
-                      <div className="pt-4 flex gap-3">
-                        {isItemInCart(b.id) ? (
-                          <Button 
-                            type="button"
-                            variant="outline"
-                            className="rounded-xl font-bold h-11 border-primary text-primary hover:bg-primary/5"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              navigate({ to: "/cart" });
-                            }}
-                          >
-                            <ShoppingCart className="mr-2 h-4 w-4" /> Go to Cart
-                          </Button>
-                        ) : (
-                          <Button 
-                            type="button"
-                            variant="outline"
-                            className="rounded-xl font-bold h-11 border-border/80 text-foreground hover:bg-secondary/40"
-                            onClick={(e) => handleAddToCart(e, b)}
-                          >
-                            <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-                          </Button>
-                        )}
+                    <div className="pt-4 flex gap-3">
+                      {isItemInCart(b.id) ? (
                         <Button 
-                          type="button" 
-                          variant="hero" 
-                          className="rounded-xl font-bold h-11"
-                          onClick={(e) => handleBuyNow(e, b)}
+                          type="button"
+                          variant="outline"
+                          className="rounded-xl font-bold h-11 border-primary text-primary hover:bg-primary/5"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            navigate({ to: "/cart" });
+                          }}
                         >
-                          Buy Now <ArrowRight className="ml-2 h-4 w-4" />
+                          <ShoppingCart className="mr-2 h-4 w-4" /> Go to Cart
                         </Button>
-                      </div>
-                    )}
+                      ) : (
+                        <Button 
+                          type="button"
+                          variant="outline"
+                          className="rounded-xl font-bold h-11 border-border/80 text-foreground hover:bg-secondary/40"
+                          onClick={(e) => handleAddToCart(e, b)}
+                        >
+                          <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+                        </Button>
+                      )}
+                      <Button 
+                        type="button" 
+                        variant="hero" 
+                        className="rounded-xl font-bold h-11"
+                        onClick={(e) => handleBuyNow(e, b)}
+                      >
+                        Buy Now <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="h-64 md:h-80 w-full overflow-hidden rounded-2xl border border-border/80 bg-secondary/30 relative flex items-center justify-center">
                     {b.image_urls?.[0] ? (
                       <img src={b.image_urls[0]} alt={b.title} className="h-full w-full object-cover" />
                     ) : (
-                      <span className="text-8xl select-none">{b.category === "feed" ? "🌾" : "🐓"}</span>
+                      <span className="text-8xl select-none">🌾</span>
                     )}
                   </div>
                 </div>
@@ -283,15 +230,14 @@ function MarketplacePage() {
         {/* Listings Grid */}
         {q.isLoading ? (
           <div className="mt-12 text-center text-muted-foreground">Loading listings…</div>
-        ) : filteredListings.length === 0 ? (
+        ) : rawListings.length === 0 ? (
           <div className="mt-16 rounded-2xl border border-dashed border-border bg-card p-12 text-center">
             <p className="font-display text-xl text-foreground">No listings found</p>
             <p className="mt-2 text-sm text-muted-foreground">Try adjusting your search or filters.</p>
           </div>
         ) : (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredListings.map((l: any) => {
-              const isAdminSeller = l.farmer_id?.roles?.includes("admin");
+            {rawListings.map((l: any) => {
               return (
                 <Link
                   key={l.id}
@@ -305,20 +251,9 @@ function MarketplacePage() {
                         <img src={l.image_urls[0]} alt={l.title} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
                       ) : (
                         <div className="grid h-full place-items-center font-display text-3xl text-primary/30">
-                          {l.category === "feed" ? "🌾" : "🐓"}
+                          🌾
                         </div>
                       )}
-                      
-                      {/* Seller Type Badge on Image */}
-                      <div className="absolute top-3 left-3">
-                        <span className={`rounded-lg px-2.5 py-1 text-[10px] font-bold tracking-wide uppercase shadow-sm border ${
-                          isAdminSeller 
-                            ? "bg-primary text-primary-foreground border-primary" 
-                            : "bg-background text-foreground border-border"
-                        }`}>
-                          {isAdminSeller ? "Admin Seller" : "Farmer Seller"}
-                        </span>
-                      </div>
                     </div>
                     <div className="p-5 pb-0">
                       <div className="flex items-center justify-between gap-2">
@@ -333,43 +268,39 @@ function MarketplacePage() {
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Hide action buttons for Admin */}
-                  {!isAdmin && (
-                    <div className="p-5 pt-3 grid grid-cols-2 gap-2">
-                      {isItemInCart(l.id) ? (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="font-bold rounded-xl py-4 flex items-center justify-center gap-1.5 h-10 border-primary text-primary hover:bg-primary/5 text-xs"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            navigate({ to: "/cart" });
-                          }}
-                        >
-                          <ShoppingCart className="h-3.5 w-3.5" /> Go to Cart
-                        </Button>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="font-bold rounded-xl py-4 flex items-center justify-center gap-1.5 h-10 border-border/80 text-foreground hover:bg-secondary/40 text-xs"
-                          onClick={(e) => handleAddToCart(e, l)}
-                        >
-                          <ShoppingCart className="h-3.5 w-3.5" /> Add to Cart
-                        </Button>
-                      )}
+                  <div className="p-5 pt-3 grid grid-cols-2 gap-2">
+                    {isItemInCart(l.id) ? (
                       <Button
                         type="button"
-                        variant="hero"
-                        className="font-bold rounded-xl py-4 flex items-center justify-center gap-1.5 h-10"
-                        onClick={(e) => handleBuyNow(e, l)}
+                        variant="outline"
+                        className="font-bold rounded-xl py-4 flex items-center justify-center gap-1.5 h-10 border-primary text-primary hover:bg-primary/5 text-xs"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          navigate({ to: "/cart" });
+                        }}
                       >
-                        Buy Now
+                        <ShoppingCart className="h-3.5 w-3.5" /> Go to Cart
                       </Button>
-                    </div>
-                  )}
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="font-bold rounded-xl py-4 flex items-center justify-center gap-1.5 h-10 border-border/80 text-foreground hover:bg-secondary/40 text-xs"
+                        onClick={(e) => handleAddToCart(e, l)}
+                      >
+                        <ShoppingCart className="h-3.5 w-3.5" /> Add to Cart
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="hero"
+                      className="font-bold rounded-xl py-4 flex items-center justify-center gap-1.5 h-10"
+                      onClick={(e) => handleBuyNow(e, l)}
+                    >
+                      Buy Now
+                    </Button>
+                  </div>
                 </Link>
               );
             })}

@@ -25,9 +25,15 @@ import { Route as AuthenticatedMarketplaceIndexRouteImport } from './routes/_aut
 import { Route as AuthenticatedFarmerIndexRouteImport } from './routes/_authenticated/farmer/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedMarketplaceIdRouteImport } from './routes/_authenticated/marketplace/$id'
+import { Route as AuthenticatedFarmerFeedPurchaseRouteImport } from './routes/_authenticated/farmer/feed-purchase'
+import { Route as AuthenticatedFarmerChicksPurchaseRouteImport } from './routes/_authenticated/farmer/chicks-purchase'
+import { Route as AuthenticatedFarmerBirdsSellRouteImport } from './routes/_authenticated/farmer/birds-sell'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
-import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authenticated/admin/listings'
+import { Route as AuthenticatedAdminManageListingsRouteImport } from './routes/_authenticated/admin.manage-listings'
+import { Route as AuthenticatedAdminFeedSellRouteImport } from './routes/_authenticated/admin.feed-sell'
+import { Route as AuthenticatedAdminChicksSellRouteImport } from './routes/_authenticated/admin.chicks-sell'
 import { Route as AuthenticatedFarmerListingsNewRouteImport } from './routes/_authenticated/farmer/listings/new'
 import { Route as AuthenticatedFarmerListingsIdEditRouteImport } from './routes/_authenticated/farmer/listings/$id/edit'
 
@@ -113,21 +119,57 @@ const AuthenticatedMarketplaceIdRoute =
     path: '/marketplace/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedFarmerFeedPurchaseRoute =
+  AuthenticatedFarmerFeedPurchaseRouteImport.update({
+    id: '/farmer/feed-purchase',
+    path: '/farmer/feed-purchase',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFarmerChicksPurchaseRoute =
+  AuthenticatedFarmerChicksPurchaseRouteImport.update({
+    id: '/farmer/chicks-purchase',
+    path: '/farmer/chicks-purchase',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFarmerBirdsSellRoute =
+  AuthenticatedFarmerBirdsSellRouteImport.update({
+    id: '/farmer/birds-sell',
+    path: '/farmer/birds-sell',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminSettingsRoute =
+  AuthenticatedAdminSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminOrdersRoute =
   AuthenticatedAdminOrdersRouteImport.update({
     id: '/orders',
     path: '/orders',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminListingsRoute =
-  AuthenticatedAdminListingsRouteImport.update({
-    id: '/listings',
-    path: '/listings',
+const AuthenticatedAdminManageListingsRoute =
+  AuthenticatedAdminManageListingsRouteImport.update({
+    id: '/manage-listings',
+    path: '/manage-listings',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminFeedSellRoute =
+  AuthenticatedAdminFeedSellRouteImport.update({
+    id: '/feed-sell',
+    path: '/feed-sell',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminChicksSellRoute =
+  AuthenticatedAdminChicksSellRouteImport.update({
+    id: '/chicks-sell',
+    path: '/chicks-sell',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedFarmerListingsNewRoute =
@@ -155,9 +197,15 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/orders': typeof AuthenticatedOrdersRoute
   '/pending': typeof AuthenticatedPendingRoute
-  '/admin/listings': typeof AuthenticatedAdminListingsRoute
+  '/admin/chicks-sell': typeof AuthenticatedAdminChicksSellRoute
+  '/admin/feed-sell': typeof AuthenticatedAdminFeedSellRoute
+  '/admin/manage-listings': typeof AuthenticatedAdminManageListingsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/farmer/birds-sell': typeof AuthenticatedFarmerBirdsSellRoute
+  '/farmer/chicks-purchase': typeof AuthenticatedFarmerChicksPurchaseRoute
+  '/farmer/feed-purchase': typeof AuthenticatedFarmerFeedPurchaseRoute
   '/marketplace/$id': typeof AuthenticatedMarketplaceIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/farmer/': typeof AuthenticatedFarmerIndexRoute
@@ -176,9 +224,15 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/orders': typeof AuthenticatedOrdersRoute
   '/pending': typeof AuthenticatedPendingRoute
-  '/admin/listings': typeof AuthenticatedAdminListingsRoute
+  '/admin/chicks-sell': typeof AuthenticatedAdminChicksSellRoute
+  '/admin/feed-sell': typeof AuthenticatedAdminFeedSellRoute
+  '/admin/manage-listings': typeof AuthenticatedAdminManageListingsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/farmer/birds-sell': typeof AuthenticatedFarmerBirdsSellRoute
+  '/farmer/chicks-purchase': typeof AuthenticatedFarmerChicksPurchaseRoute
+  '/farmer/feed-purchase': typeof AuthenticatedFarmerFeedPurchaseRoute
   '/marketplace/$id': typeof AuthenticatedMarketplaceIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/farmer': typeof AuthenticatedFarmerIndexRoute
@@ -200,9 +254,15 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/pending': typeof AuthenticatedPendingRoute
-  '/_authenticated/admin/listings': typeof AuthenticatedAdminListingsRoute
+  '/_authenticated/admin/chicks-sell': typeof AuthenticatedAdminChicksSellRoute
+  '/_authenticated/admin/feed-sell': typeof AuthenticatedAdminFeedSellRoute
+  '/_authenticated/admin/manage-listings': typeof AuthenticatedAdminManageListingsRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
+  '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/farmer/birds-sell': typeof AuthenticatedFarmerBirdsSellRoute
+  '/_authenticated/farmer/chicks-purchase': typeof AuthenticatedFarmerChicksPurchaseRoute
+  '/_authenticated/farmer/feed-purchase': typeof AuthenticatedFarmerFeedPurchaseRoute
   '/_authenticated/marketplace/$id': typeof AuthenticatedMarketplaceIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/farmer/': typeof AuthenticatedFarmerIndexRoute
@@ -224,9 +284,15 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/orders'
     | '/pending'
-    | '/admin/listings'
+    | '/admin/chicks-sell'
+    | '/admin/feed-sell'
+    | '/admin/manage-listings'
     | '/admin/orders'
+    | '/admin/settings'
     | '/admin/users'
+    | '/farmer/birds-sell'
+    | '/farmer/chicks-purchase'
+    | '/farmer/feed-purchase'
     | '/marketplace/$id'
     | '/admin/'
     | '/farmer/'
@@ -245,9 +311,15 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/orders'
     | '/pending'
-    | '/admin/listings'
+    | '/admin/chicks-sell'
+    | '/admin/feed-sell'
+    | '/admin/manage-listings'
     | '/admin/orders'
+    | '/admin/settings'
     | '/admin/users'
+    | '/farmer/birds-sell'
+    | '/farmer/chicks-purchase'
+    | '/farmer/feed-purchase'
     | '/marketplace/$id'
     | '/admin'
     | '/farmer'
@@ -268,9 +340,15 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/orders'
     | '/_authenticated/pending'
-    | '/_authenticated/admin/listings'
+    | '/_authenticated/admin/chicks-sell'
+    | '/_authenticated/admin/feed-sell'
+    | '/_authenticated/admin/manage-listings'
     | '/_authenticated/admin/orders'
+    | '/_authenticated/admin/settings'
     | '/_authenticated/admin/users'
+    | '/_authenticated/farmer/birds-sell'
+    | '/_authenticated/farmer/chicks-purchase'
+    | '/_authenticated/farmer/feed-purchase'
     | '/_authenticated/marketplace/$id'
     | '/_authenticated/admin/'
     | '/_authenticated/farmer/'
@@ -402,11 +480,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMarketplaceIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/farmer/feed-purchase': {
+      id: '/_authenticated/farmer/feed-purchase'
+      path: '/farmer/feed-purchase'
+      fullPath: '/farmer/feed-purchase'
+      preLoaderRoute: typeof AuthenticatedFarmerFeedPurchaseRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/farmer/chicks-purchase': {
+      id: '/_authenticated/farmer/chicks-purchase'
+      path: '/farmer/chicks-purchase'
+      fullPath: '/farmer/chicks-purchase'
+      preLoaderRoute: typeof AuthenticatedFarmerChicksPurchaseRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/farmer/birds-sell': {
+      id: '/_authenticated/farmer/birds-sell'
+      path: '/farmer/birds-sell'
+      fullPath: '/farmer/birds-sell'
+      preLoaderRoute: typeof AuthenticatedFarmerBirdsSellRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/users': {
       id: '/_authenticated/admin/users'
       path: '/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/orders': {
@@ -416,11 +522,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/listings': {
-      id: '/_authenticated/admin/listings'
-      path: '/listings'
-      fullPath: '/admin/listings'
-      preLoaderRoute: typeof AuthenticatedAdminListingsRouteImport
+    '/_authenticated/admin/manage-listings': {
+      id: '/_authenticated/admin/manage-listings'
+      path: '/manage-listings'
+      fullPath: '/admin/manage-listings'
+      preLoaderRoute: typeof AuthenticatedAdminManageListingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/feed-sell': {
+      id: '/_authenticated/admin/feed-sell'
+      path: '/feed-sell'
+      fullPath: '/admin/feed-sell'
+      preLoaderRoute: typeof AuthenticatedAdminFeedSellRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/chicks-sell': {
+      id: '/_authenticated/admin/chicks-sell'
+      path: '/chicks-sell'
+      fullPath: '/admin/chicks-sell'
+      preLoaderRoute: typeof AuthenticatedAdminChicksSellRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/farmer/listings/new': {
@@ -441,15 +561,21 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
-  AuthenticatedAdminListingsRoute: typeof AuthenticatedAdminListingsRoute
+  AuthenticatedAdminChicksSellRoute: typeof AuthenticatedAdminChicksSellRoute
+  AuthenticatedAdminFeedSellRoute: typeof AuthenticatedAdminFeedSellRoute
+  AuthenticatedAdminManageListingsRoute: typeof AuthenticatedAdminManageListingsRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
+  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
-  AuthenticatedAdminListingsRoute: AuthenticatedAdminListingsRoute,
+  AuthenticatedAdminChicksSellRoute: AuthenticatedAdminChicksSellRoute,
+  AuthenticatedAdminFeedSellRoute: AuthenticatedAdminFeedSellRoute,
+  AuthenticatedAdminManageListingsRoute: AuthenticatedAdminManageListingsRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
+  AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
@@ -464,6 +590,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedPendingRoute: typeof AuthenticatedPendingRoute
+  AuthenticatedFarmerBirdsSellRoute: typeof AuthenticatedFarmerBirdsSellRoute
+  AuthenticatedFarmerChicksPurchaseRoute: typeof AuthenticatedFarmerChicksPurchaseRoute
+  AuthenticatedFarmerFeedPurchaseRoute: typeof AuthenticatedFarmerFeedPurchaseRoute
   AuthenticatedMarketplaceIdRoute: typeof AuthenticatedMarketplaceIdRoute
   AuthenticatedFarmerIndexRoute: typeof AuthenticatedFarmerIndexRoute
   AuthenticatedMarketplaceIndexRoute: typeof AuthenticatedMarketplaceIndexRoute
@@ -478,6 +607,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedPendingRoute: AuthenticatedPendingRoute,
+  AuthenticatedFarmerBirdsSellRoute: AuthenticatedFarmerBirdsSellRoute,
+  AuthenticatedFarmerChicksPurchaseRoute:
+    AuthenticatedFarmerChicksPurchaseRoute,
+  AuthenticatedFarmerFeedPurchaseRoute: AuthenticatedFarmerFeedPurchaseRoute,
   AuthenticatedMarketplaceIdRoute: AuthenticatedMarketplaceIdRoute,
   AuthenticatedFarmerIndexRoute: AuthenticatedFarmerIndexRoute,
   AuthenticatedMarketplaceIndexRoute: AuthenticatedMarketplaceIndexRoute,

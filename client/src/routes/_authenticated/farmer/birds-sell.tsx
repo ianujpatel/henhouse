@@ -9,25 +9,21 @@ import { useRequireRole } from "@/hooks/use-require-role";
 import { ListingForm } from "@/components/listing-form";
 import { ListingImage } from "@/types";
 
-export const Route = createFileRoute("/_authenticated/farmer/listings/new")({
-  component: NewListing,
+export const Route = createFileRoute("/_authenticated/farmer/birds-sell")({
+  component: BirdsSellPage,
 });
 
-function NewListing() {
-  useRequireRole(["farmer", "admin"]);
+function BirdsSellPage() {
+  useRequireRole(["farmer"]);
   const navigate = useNavigate();
   const fn = useServerFn(createListing);
   
   const meQ = useQuery({ queryKey: ["me"] });
   const isAdmin = (meQ.data as any)?.roles?.includes("admin") ?? false;
-  
-  const getDashboardLink = (cat?: string) => {
-    if (!isAdmin) return "/farmer";
-    return "/admin/manage-listings";
-  };
+  const dashboardLink = "/farmer";
 
   const handleCancel = () => {
-    navigate({ to: getDashboardLink() });
+    navigate({ to: dashboardLink });
   };
 
   const handleSubmit = async (submitData: any, images: ListingImage[]) => {
@@ -39,7 +35,7 @@ function NewListing() {
         },
       });
       toast.success(isAdmin ? "Listing published live!" : "Listing submitted — admin will price it shortly");
-      navigate({ to: getDashboardLink(submitData.category) });
+      navigate({ to: dashboardLink });
     } catch (e: any) {
       toast.error(e?.message ?? "Could not create listing");
     }
@@ -49,12 +45,12 @@ function NewListing() {
     <div className="min-h-screen">
       <AppHeader />
       <main className="container mx-auto max-w-2xl px-4 py-10">
-        <Link to={getDashboardLink()} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back
+        <Link to={dashboardLink} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
         </Link>
-        <h1 className="mt-4 font-display text-3xl font-semibold text-primary">New listing</h1>
+        <h1 className="mt-4 font-display text-3xl font-semibold text-primary">Birds Sell</h1>
         <p className="mt-1 text-muted-foreground">
-          Fill in the details to publish a new chicken or feed listing on the marketplace.
+          Directly create and publish a new chicken listing on the marketplace.
         </p>
 
         <ListingForm 
@@ -63,6 +59,7 @@ function NewListing() {
           isAdmin={isAdmin}
           isEdit={false}
           submitButtonText="Submit Listing"
+          showProductTypeSelector={false}
         />
       </main>
     </div>

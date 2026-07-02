@@ -47,11 +47,8 @@ function FarmerDashboard() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="font-display text-4xl font-semibold text-primary">Farmer dashboard</h1>
-            <p className="mt-1 text-muted-foreground">Manage your listings, track your payouts.</p>
+            <p className="mt-1 text-muted-foreground">Track your orders and payouts.</p>
           </div>
-          <Button variant="hero" asChild>
-            <Link to="/farmer/listings/new"><Plus className="h-4 w-4" /> New listing</Link>
-          </Button>
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -59,53 +56,6 @@ function FarmerDashboard() {
           <Stat icon={Egg} label="Birds sold" value={totalSold.toString()} />
           <Stat icon={AlertCircle} label="Your earnings" value={formatPrice(totalPayout)} accent />
         </div>
-
-        <h2 className="mt-12 font-display text-2xl font-semibold text-foreground">Your listings</h2>
-        {lq.isLoading ? (
-          <div className="mt-4 text-muted-foreground">Loading…</div>
-        ) : listings.length === 0 ? (
-          <div className="mt-6 rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-            <p className="font-display text-xl text-foreground">No listings yet</p>
-            <p className="mt-2 text-sm text-muted-foreground">Create your first listing to start selling.</p>
-            <Button variant="hero" className="mt-5" asChild>
-              <Link to="/farmer/listings/new"><Plus className="h-4 w-4" /> New listing</Link>
-            </Button>
-          </div>
-        ) : (
-          <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
-            <table className="w-full text-sm">
-              <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3">Listing</th>
-                  <th className="px-5 py-3">Category</th>
-                  <th className="px-5 py-3">Qty</th>
-                  <th className="px-5 py-3">Your price</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {listings.map((l: any) => {
-                  const s = STATUS_LABEL[l.status] ?? STATUS_LABEL.draft;
-                  return (
-                    <tr key={l.id} className="border-t border-border">
-                      <td className="px-5 py-4 font-medium text-foreground">{l.title}</td>
-                      <td className="px-5 py-4 capitalize text-muted-foreground">{l.category}</td>
-                      <td className="px-5 py-4">{l.quantity} {l.unit}</td>
-                      <td className="px-5 py-4">{formatPrice(l.farmer_price)}</td>
-                      <td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-xs ${s.tone}`}>{s.label}</span></td>
-                      <td className="px-5 py-4 text-right">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link to="/farmer/listings/$id/edit" params={{ id: l.id }}>Edit</Link>
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
 
         <h2 className="mt-12 font-display text-2xl font-semibold text-foreground flex items-center gap-2">
           Pending Orders <span className="rounded-full bg-warning/20 px-2.5 py-0.5 text-xs text-warning-foreground font-medium">{pendingOrders.length}</span>

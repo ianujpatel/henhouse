@@ -10,11 +10,11 @@ import { adminListAllListings, adminSetBuyerPrice } from "@/lib/admin.functions"
 import { archiveListing } from "@/lib/listings.functions";
 import { formatPrice } from "@/lib/format";
 
-export const Route = createFileRoute("/_authenticated/admin/listings")({
-  component: AdminListings,
+export const Route = createFileRoute("/_authenticated/admin/manage-listings")({
+  component: AdminManageListings,
 });
 
-function AdminListings() {
+function AdminManageListings() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const listFn = useServerFn(adminListAllListings);
@@ -70,19 +70,27 @@ function AdminListings() {
     }
   };
 
-  if (q.isLoading) return <div className="text-muted-foreground py-10 text-center">Loading listings...</div>;
+  if (q.isLoading) {
+    return <div className="text-muted-foreground py-10 text-center">Loading all listings...</div>;
+  }
+  
   const rows = q.data ?? [];
 
   return (
     <div className="bg-card border border-border rounded-3xl p-6 shadow-soft">
       <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
         <div>
-          <h2 className="font-display text-lg font-bold text-foreground">Marketplace Listings</h2>
-          <p className="text-xs text-muted-foreground">Manage and set prices for chickens and feeds listed on the marketplace.</p>
+          <h2 className="font-display text-lg font-bold text-foreground">Manage Listings</h2>
+          <p className="text-xs text-muted-foreground">Approve, set prices, edit, or archive all chicken and feed listings across the platform.</p>
         </div>
-        <Button onClick={() => navigate({ to: "/farmer/listings/new" })} variant="hero" size="sm" className="rounded-xl font-bold">
-          <Plus className="h-4 w-4 mr-2" /> Create Listing
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => navigate({ to: "/admin/chicks-sell" })} variant="outline" size="sm" className="rounded-xl font-bold">
+            <Plus className="h-4 w-4 mr-2" /> Chicken Listing
+          </Button>
+          <Button onClick={() => navigate({ to: "/admin/feed-sell" })} variant="outline" size="sm" className="rounded-xl font-bold">
+            <Plus className="h-4 w-4 mr-2" /> Feed Listing
+          </Button>
+        </div>
       </div>
 
       <div className="border border-border/80 rounded-2xl overflow-hidden">
@@ -162,7 +170,17 @@ function AdminListings() {
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8 rounded-lg"
-                        title={isLive ? "Deactivate listing" : "Activate listing"}
+                        title="View details in marketplace"
+                        onClick={() => navigate({ to: `/marketplace/${l.id}` })}
+                      >
+                        <Eye className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                      </Button>
+
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 rounded-lg"
+                        title={isLive ? "Deactivate listing" : "Activate/Approve listing"}
                         onClick={() => toggleStatus(l)}
                       >
                         <Power className={`h-3.5 w-3.5 ${isLive ? "text-emerald-600" : "text-muted-foreground"}`} />

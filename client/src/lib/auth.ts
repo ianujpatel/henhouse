@@ -1,14 +1,6 @@
 import { api } from "./api-client";
+import { User } from "@/types";
 
-interface User {
-  id: string;
-  email: string;
-  full_name?: string;
-  phone?: string;
-  farm_name?: string;
-  roles?: string[];
-  status?: string;
-}
 
 export const auth = {
   signUp: async ({
