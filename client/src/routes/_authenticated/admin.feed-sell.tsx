@@ -42,6 +42,7 @@ function AdminFeedSell() {
     farmer_price: "" as any,
     location: "",
     description: "",
+    feed_category: "",
     is_featured_banner: false,
     target_audience: "both" as "buyer" | "farmer" | "both",
   });
@@ -87,6 +88,10 @@ function AdminFeedSell() {
       toast.error("Brand is required.");
       return;
     }
+    if (!form.feed_category) {
+      toast.error("Feed Category is required.");
+      return;
+    }
     setSubmitting(true);
     try {
       await fn({
@@ -103,6 +108,7 @@ function AdminFeedSell() {
           images: images,
           status: "live",
           brand: form.brand,
+          feed_category: form.feed_category,
           is_featured_banner: form.is_featured_banner,
           specifications: form.specifications || null,
           target_audience: form.target_audience,
@@ -141,10 +147,28 @@ function AdminFeedSell() {
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <Label htmlFor="brand">Brand *</Label>
               <Input id="brand" required value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="E.g., Suguna Feed" />
+            </div>
+            <div>
+              <Label>Feed Category *</Label>
+              <Select
+                value={form.feed_category}
+                onValueChange={(v) => setForm({ ...form, feed_category: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Pre Starter", "Starter", "Final"].map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="specifications">Specifications (optional)</Label>

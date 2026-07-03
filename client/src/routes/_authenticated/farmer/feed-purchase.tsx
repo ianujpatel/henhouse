@@ -6,6 +6,13 @@ import { Search, ChevronLeft, ChevronRight, ArrowRight, ShoppingCart } from "luc
 import { AppHeader } from "@/components/app-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { listMarketplace } from "@/lib/listings.functions";
 import { useRequireRole } from "@/hooks/use-require-role";
 import { formatPrice } from "@/lib/format";
@@ -20,14 +27,30 @@ function FeedPurchasePage() {
   useRequireRole(["farmer"]);
   const navigate = useNavigate();
   const { addToCart, items } = useCart();
-  const [search, setSearch] = useState("");
+  const [searchBrand, setSearchBrand] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const fn = useServerFn(listMarketplace);
   const q = useQuery({
-    queryKey: ["feed-purchase", search],
-    queryFn: () => fn({ data: { category: "feed", search } }),
+    queryKey: ["feed-purchase"],
+    queryFn: () => fn({ data: { category: "feed" } }),
   });
 
   const rawListings = q.data ?? [];
+
+  // Filter listings based on Feed Brand search and Feed Category filter
+  const filteredListings = rawListings.filter((l: any) => {
+    // 1. Search by Feed Brand
+    if (searchBrand.trim()) {
+      if (!l.brand) return false;
+      const isBrandMatch = l.brand.toLowerCase().includes(searchBrand.trim().toLowerCase());
+      if (!isBrandMatch) return false;
+    }
+    // 2. Filter by Feed Category
+    if (filterCategory !== "all") {
+      if (l.feed_category !== filterCategory) return false;
+    }
+    return true;
+  });
 
   // Filter listings marked as featured banners
   const featuredBanners = rawListings.filter(
@@ -105,15 +128,32 @@ function FeedPurchasePage() {
             <h1 className="font-display text-4xl font-semibold text-primary">Feed Purchase</h1>
             <p className="mt-1 text-muted-foreground">High-quality feed listings, transparent pricing.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <div className="relative">
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            {/* Search by Feed Brand */}
+            <div className="relative flex-1 md:flex-initial">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search listings…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-64 pl-9"
+                placeholder="Search by brand…"
+                value={searchBrand}
+                onChange={(e) => setSearchBrand(e.target.value)}
+                className="w-full md:w-64 pl-9"
               />
+            </div>
+            
+            {/* Filter by Feed Category */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">Category:</span>
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="w-36 bg-card border-border">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {["Pre Starter", "Starter", "Final"].map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
@@ -230,14 +270,14 @@ function FeedPurchasePage() {
         {/* Listings Grid */}
         {q.isLoading ? (
           <div className="mt-12 text-center text-muted-foreground">Loading listings…</div>
-        ) : rawListings.length === 0 ? (
+        ) : filteredListings.length === 0 ? (
           <div className="mt-16 rounded-2xl border border-dashed border-border bg-card p-12 text-center">
             <p className="font-display text-xl text-foreground">No listings found</p>
             <p className="mt-2 text-sm text-muted-foreground">Try adjusting your search or filters.</p>
           </div>
         ) : (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {rawListings.map((l: any) => {
+            {filteredListings.map((l: any) => {
               return (
                 <Link
                   key={l.id}
@@ -257,7 +297,12 @@ function FeedPurchasePage() {
                     </div>
                     <div className="p-5 pb-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs capitalize text-secondary-foreground">{l.category}</span>
+                        <div className="flex gap-1.5 flex-wrap">
+                          <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs capitalize text-secondary-foreground">{l.category}</span>
+                          {l.category === "feed" && l.feed_category && (
+                            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">{l.feed_category}</span>
+                          )}
+                        </div>
                         <span className="text-xs text-muted-foreground">{l.quantity} {l.unit}</span>
                       </div>
                       <h3 className="mt-3 font-display text-lg font-semibold text-foreground line-clamp-1">{l.title}</h3>

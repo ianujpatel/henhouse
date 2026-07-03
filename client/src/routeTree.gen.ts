@@ -31,6 +31,7 @@ import { Route as AuthenticatedFarmerBirdsSellRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
+import { Route as AuthenticatedAdminMarketRatesRouteImport } from './routes/_authenticated/admin.market-rates'
 import { Route as AuthenticatedAdminManageListingsRouteImport } from './routes/_authenticated/admin.manage-listings'
 import { Route as AuthenticatedAdminFeedSellRouteImport } from './routes/_authenticated/admin.feed-sell'
 import { Route as AuthenticatedAdminChicksSellRouteImport } from './routes/_authenticated/admin.chicks-sell'
@@ -154,6 +155,12 @@ const AuthenticatedAdminOrdersRoute =
     path: '/orders',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMarketRatesRoute =
+  AuthenticatedAdminMarketRatesRouteImport.update({
+    id: '/market-rates',
+    path: '/market-rates',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminManageListingsRoute =
   AuthenticatedAdminManageListingsRouteImport.update({
     id: '/manage-listings',
@@ -200,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/admin/chicks-sell': typeof AuthenticatedAdminChicksSellRoute
   '/admin/feed-sell': typeof AuthenticatedAdminFeedSellRoute
   '/admin/manage-listings': typeof AuthenticatedAdminManageListingsRoute
+  '/admin/market-rates': typeof AuthenticatedAdminMarketRatesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -227,6 +235,7 @@ export interface FileRoutesByTo {
   '/admin/chicks-sell': typeof AuthenticatedAdminChicksSellRoute
   '/admin/feed-sell': typeof AuthenticatedAdminFeedSellRoute
   '/admin/manage-listings': typeof AuthenticatedAdminManageListingsRoute
+  '/admin/market-rates': typeof AuthenticatedAdminMarketRatesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -257,6 +266,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/chicks-sell': typeof AuthenticatedAdminChicksSellRoute
   '/_authenticated/admin/feed-sell': typeof AuthenticatedAdminFeedSellRoute
   '/_authenticated/admin/manage-listings': typeof AuthenticatedAdminManageListingsRoute
+  '/_authenticated/admin/market-rates': typeof AuthenticatedAdminMarketRatesRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/admin/chicks-sell'
     | '/admin/feed-sell'
     | '/admin/manage-listings'
+    | '/admin/market-rates'
     | '/admin/orders'
     | '/admin/settings'
     | '/admin/users'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/admin/chicks-sell'
     | '/admin/feed-sell'
     | '/admin/manage-listings'
+    | '/admin/market-rates'
     | '/admin/orders'
     | '/admin/settings'
     | '/admin/users'
@@ -343,6 +355,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/chicks-sell'
     | '/_authenticated/admin/feed-sell'
     | '/_authenticated/admin/manage-listings'
+    | '/_authenticated/admin/market-rates'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/users'
@@ -522,6 +535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/market-rates': {
+      id: '/_authenticated/admin/market-rates'
+      path: '/market-rates'
+      fullPath: '/admin/market-rates'
+      preLoaderRoute: typeof AuthenticatedAdminMarketRatesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/manage-listings': {
       id: '/_authenticated/admin/manage-listings'
       path: '/manage-listings'
@@ -564,6 +584,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminChicksSellRoute: typeof AuthenticatedAdminChicksSellRoute
   AuthenticatedAdminFeedSellRoute: typeof AuthenticatedAdminFeedSellRoute
   AuthenticatedAdminManageListingsRoute: typeof AuthenticatedAdminManageListingsRoute
+  AuthenticatedAdminMarketRatesRoute: typeof AuthenticatedAdminMarketRatesRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -574,6 +595,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminChicksSellRoute: AuthenticatedAdminChicksSellRoute,
   AuthenticatedAdminFeedSellRoute: AuthenticatedAdminFeedSellRoute,
   AuthenticatedAdminManageListingsRoute: AuthenticatedAdminManageListingsRoute,
+  AuthenticatedAdminMarketRatesRoute: AuthenticatedAdminMarketRatesRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,

@@ -322,7 +322,12 @@ function MarketplacePage() {
                     </div>
                     <div className="p-5 pb-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs capitalize text-secondary-foreground">{l.category}</span>
+                        <div className="flex gap-1.5 flex-wrap">
+                          <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs capitalize text-secondary-foreground">{l.category}</span>
+                          {l.category === "feed" && l.feed_category && (
+                            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">{l.feed_category}</span>
+                          )}
+                        </div>
                         <span className="text-xs text-muted-foreground">{l.quantity} {l.unit}</span>
                       </div>
                       <h3 className="mt-3 font-display text-lg font-semibold text-foreground line-clamp-1">{l.title}</h3>

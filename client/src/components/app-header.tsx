@@ -63,6 +63,7 @@ export function AppHeader() {
     }
     if (isAdmin) {
       links.push({ to: "/admin", label: "Admin" });
+      links.push({ to: "/admin/market-rates", label: "Market Rates" });
       links.push({ to: "/admin/chicks-sell", label: "Chicken Listings" });
       links.push({ to: "/admin/feed-sell", label: "Feed Listings" });
       links.push({ to: "/admin/manage-listings", label: "Manage Listings" });

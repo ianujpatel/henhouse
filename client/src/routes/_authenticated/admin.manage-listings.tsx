@@ -116,7 +116,12 @@ function AdminManageListings() {
                 <tr key={l.id}>
                   <td className="p-3">
                     <div className="font-semibold text-foreground">{l.title}</div>
-                    <div className="text-[10px] capitalize text-muted-foreground">{l.category}</div>
+                    <div className="text-[10px] capitalize text-muted-foreground flex gap-1.5 items-center">
+                      <span>{l.category}</span>
+                      {l.category === "feed" && l.feed_category && (
+                        <span className="font-bold text-accent">({l.feed_category})</span>
+                      )}
+                    </div>
                   </td>
                   <td className="p-3">
                     <div className="font-medium text-foreground">

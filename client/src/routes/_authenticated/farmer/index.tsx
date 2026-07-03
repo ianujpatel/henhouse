@@ -58,124 +58,144 @@ function FarmerDashboard() {
         </div>
 
         <h2 className="mt-12 font-display text-2xl font-semibold text-foreground flex items-center gap-2">
-          Pending Orders <span className="rounded-full bg-warning/20 px-2.5 py-0.5 text-xs text-warning-foreground font-medium">{pendingOrders.length}</span>
+          Pending Orders <span className="rounded-full bg-warning/20 px-2.5 py-0.5 text-xs text-warning-foreground font-semibold">{pendingOrders.length}</span>
         </h2>
         {oq.isLoading ? (
           <div className="mt-4 text-muted-foreground">Loading…</div>
         ) : pendingOrders.length === 0 ? (
           <div className="mt-4 text-sm text-muted-foreground bg-secondary/35 p-4 rounded-xl border border-border">No pending orders.</div>
         ) : (
-          <div className="mt-4 overflow-hidden overflow-x-auto w-full rounded-2xl border border-border bg-card shadow-soft">
-            <table className="w-full text-sm min-w-[600px]">
-              <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3">Date</th>
-                  <th className="px-5 py-3">Order ID</th>
-                  <th className="px-5 py-3">Qty</th>
-                  <th className="px-5 py-3 font-semibold">Pending payout</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingOrders.map((it: any) => (
-                  <tr key={it.id} className="border-t border-border">
-                    <td className="px-5 py-4">{formatDate(it.created_at)}</td>
-                    <td className="px-5 py-4 font-mono text-xs">#{it.order_id.slice(0, 8)}</td>
-                    <td className="px-5 py-4">{it.quantity}</td>
-                    <td className="px-5 py-4 font-semibold text-muted-foreground">{formatPrice(Number(it.unit_farmer_price) * it.quantity)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {pendingOrders.map((it: any) => (
+              <div key={it.id} className="rounded-2xl border border-border bg-card p-5 shadow-soft hover:shadow-card transition duration-200">
+                <div className="flex justify-between items-start gap-4">
+                  <div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase block">Order ID</span>
+                    <span className="font-mono text-sm text-foreground">#{it.order_id.slice(-8).toUpperCase()}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase block">Date</span>
+                    <span className="text-xs text-foreground">{formatDate(it.created_at)}</span>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
+                  <div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase block">Quantity</span>
+                    <span className="text-sm font-semibold text-foreground">{it.quantity}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase block">Pending Payout</span>
+                    <span className="text-sm font-bold text-accent">{formatPrice(Number(it.unit_farmer_price) * it.quantity)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
         <h2 className="mt-12 font-display text-2xl font-semibold text-foreground flex items-center gap-2">
-          Placed Orders <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs text-blue-500 font-medium">{placedOrders.length}</span>
+          Placed Orders <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs text-blue-500 font-semibold">{placedOrders.length}</span>
         </h2>
         {oq.isLoading ? (
           <div className="mt-4 text-muted-foreground">Loading…</div>
         ) : placedOrders.length === 0 ? (
           <div className="mt-4 text-sm text-muted-foreground bg-secondary/35 p-4 rounded-xl border border-border">No placed orders yet.</div>
         ) : (
-          <div className="mt-4 overflow-hidden overflow-x-auto w-full rounded-2xl border border-border bg-card shadow-soft">
-            <table className="w-full text-sm min-w-[800px]">
-              <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3">Date</th>
-                  <th className="px-5 py-3">Order ID</th>
-                  <th className="px-5 py-3">Qty</th>
-                  <th className="px-5 py-3 font-semibold">Your payout</th>
-                  <th className="px-5 py-3">Delivery details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {placedOrders.map((it: any) => (
-                  <tr key={it.id} className="border-t border-border">
-                    <td className="px-5 py-4">{formatDate(it.created_at)}</td>
-                    <td className="px-5 py-4 font-mono text-xs">#{it.order_id.slice(0, 8)}</td>
-                    <td className="px-5 py-4">{it.quantity}</td>
-                    <td className="px-5 py-4 font-semibold text-primary">{formatPrice(Number(it.unit_farmer_price) * it.quantity)}</td>
-                    <td className="px-5 py-4 text-xs">
-                      {it.delivery ? (
-                        <div>
-                          <div className="font-semibold text-foreground">{it.delivery.full_name} ({it.delivery.mobile})</div>
-                          <div className="text-muted-foreground">
-                            {it.delivery.address}, {it.delivery.city}, {it.delivery.district}, {it.delivery.state} - {it.delivery.pincode}
-                            {it.delivery.landmark && <div>Landmark: {it.delivery.landmark}</div>}
-                            {it.delivery.notes && <div className="italic text-primary/80 mt-0.5">Notes: {it.delivery.notes}</div>}
-                          </div>
-                        </div>
-                      ) : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-4 grid gap-6 md:grid-cols-2">
+            {placedOrders.map((it: any) => (
+              <div key={it.id} className="rounded-2xl border border-border bg-card p-5 shadow-soft hover:shadow-card transition duration-200 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start gap-4 pb-3 border-b border-border/50">
+                    <div>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase block">Order ID</span>
+                      <span className="font-mono text-sm text-foreground">#{it.order_id.slice(-8).toUpperCase()}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase block">Placed Date</span>
+                      <span className="text-xs text-foreground">{formatDate(it.created_at)}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase block">Quantity</span>
+                      <span className="text-sm font-semibold text-foreground">{it.quantity}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase block">Your Payout</span>
+                      <span className="text-sm font-bold text-primary">{formatPrice(Number(it.unit_farmer_price) * it.quantity)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 bg-secondary/30 p-3 rounded-xl border border-border/50 text-xs">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Delivery details</span>
+                  {it.delivery ? (
+                    <div className="space-y-1">
+                      <div className="font-semibold text-foreground">{it.delivery.full_name} ({it.delivery.mobile})</div>
+                      <div className="text-muted-foreground">
+                        {it.delivery.address}, {it.delivery.city}, {it.delivery.district}, {it.delivery.state} - {it.delivery.pincode}
+                        {it.delivery.landmark && <div className="text-primary/70 font-medium mt-0.5">Landmark: {it.delivery.landmark}</div>}
+                        {it.delivery.notes && <div className="italic text-primary/80 mt-0.5 font-medium">Notes: {it.delivery.notes}</div>}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
         <h2 className="mt-12 font-display text-2xl font-semibold text-foreground flex items-center gap-2">
-          Fulfilled Orders <span className="rounded-full bg-success/10 px-2.5 py-0.5 text-xs text-success font-medium">{fulfilledOrders.length}</span>
+          Fulfilled Orders <span className="rounded-full bg-success/10 px-2.5 py-0.5 text-xs text-success font-semibold">{fulfilledOrders.length}</span>
         </h2>
         {oq.isLoading ? (
           <div className="mt-4 text-muted-foreground">Loading…</div>
         ) : fulfilledOrders.length === 0 ? (
           <div className="mt-4 text-sm text-muted-foreground bg-secondary/35 p-4 rounded-xl border border-border">No fulfilled orders yet.</div>
         ) : (
-          <div className="mt-4 overflow-hidden overflow-x-auto w-full rounded-2xl border border-border bg-card shadow-soft">
-            <table className="w-full text-sm min-w-[800px]">
-              <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3">Date</th>
-                  <th className="px-5 py-3">Order ID</th>
-                  <th className="px-5 py-3">Qty</th>
-                  <th className="px-5 py-3 font-semibold">Your payout</th>
-                  <th className="px-5 py-3">Delivery details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fulfilledOrders.map((it: any) => (
-                  <tr key={it.id} className="border-t border-border">
-                    <td className="px-5 py-4">{formatDate(it.created_at)}</td>
-                    <td className="px-5 py-4 font-mono text-xs">#{it.order_id.slice(0, 8)}</td>
-                    <td className="px-5 py-4">{it.quantity}</td>
-                    <td className="px-5 py-4 font-semibold text-primary">{formatPrice(Number(it.unit_farmer_price) * it.quantity)}</td>
-                    <td className="px-5 py-4 text-xs">
-                      {it.delivery ? (
-                        <div>
-                          <div className="font-semibold text-foreground">{it.delivery.full_name} ({it.delivery.mobile})</div>
-                          <div className="text-muted-foreground">
-                            {it.delivery.address}, {it.delivery.city}, {it.delivery.district}, {it.delivery.state} - {it.delivery.pincode}
-                            {it.delivery.landmark && <div>Landmark: {it.delivery.landmark}</div>}
-                            {it.delivery.notes && <div className="italic text-primary/80 mt-0.5">Notes: {it.delivery.notes}</div>}
-                          </div>
-                        </div>
-                      ) : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-4 grid gap-6 md:grid-cols-2">
+            {fulfilledOrders.map((it: any) => (
+              <div key={it.id} className="rounded-2xl border border-border bg-card p-5 shadow-soft hover:shadow-card transition duration-200 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start gap-4 pb-3 border-b border-border/50">
+                    <div>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase block">Order ID</span>
+                      <span className="font-mono text-sm text-foreground">#{it.order_id.slice(-8).toUpperCase()}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase block">Fulfilled Date</span>
+                      <span className="text-xs text-foreground">{formatDate(it.created_at)}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase block">Quantity</span>
+                      <span className="text-sm font-semibold text-foreground">{it.quantity}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase block">Your Payout</span>
+                      <span className="text-sm font-bold text-primary">{formatPrice(Number(it.unit_farmer_price) * it.quantity)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 bg-secondary/30 p-3 rounded-xl border border-border/50 text-xs">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Delivery details</span>
+                  {it.delivery ? (
+                    <div className="space-y-1">
+                      <div className="font-semibold text-foreground">{it.delivery.full_name} ({it.delivery.mobile})</div>
+                      <div className="text-muted-foreground">
+                        {it.delivery.address}, {it.delivery.city}, {it.delivery.district}, {it.delivery.state} - {it.delivery.pincode}
+                        {it.delivery.landmark && <div className="text-primary/70 font-medium mt-0.5">Landmark: {it.delivery.landmark}</div>}
+                        {it.delivery.notes && <div className="italic text-primary/80 mt-0.5 font-medium">Notes: {it.delivery.notes}</div>}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </main>

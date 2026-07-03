@@ -26,6 +26,7 @@ interface ListingFormData {
   location: string;
   description: string;
   brand: string;
+  feed_category: string;
   is_featured_banner: boolean;
   specifications: string;
   target_audience: "buyer" | "farmer" | "both";
@@ -73,6 +74,7 @@ export function ListingForm({
     location: initialData?.location ?? "",
     description: initialData?.description ?? "",
     brand: initialData?.brand ?? "",
+    feed_category: (initialData as any)?.feed_category ?? "",
     is_featured_banner: initialData?.is_featured_banner ?? false,
     specifications: initialData?.specifications ?? "",
     target_audience: initialData?.target_audience ?? "both",
@@ -90,6 +92,7 @@ export function ListingForm({
         location: initialData.location ?? "",
         description: initialData.description ?? "",
         brand: initialData.brand ?? "",
+        feed_category: (initialData as any).feed_category ?? "",
         is_featured_banner: initialData.is_featured_banner ?? false,
         specifications: initialData.specifications ?? "",
         target_audience: initialData.target_audience ?? "both",
@@ -147,6 +150,10 @@ export function ListingForm({
       toast.error("Please enter a valid positive price.");
       return;
     }
+    if (productType === "feed" && !form.feed_category) {
+      toast.error("Please select a Feed Category.");
+      return;
+    }
     setSubmitting(true);
     try {
       const submitData = {
@@ -159,6 +166,7 @@ export function ListingForm({
         location: form.location || null,
         description: form.description || null,
         brand: productType === "feed" ? form.brand : null,
+        feed_category: productType === "feed" ? form.feed_category : null,
         is_featured_banner: isAdmin ? form.is_featured_banner : false,
         specifications: productType === "feed" ? form.specifications : null,
         target_audience: isAdmin ? form.target_audience : "both",
@@ -248,7 +256,7 @@ export function ListingForm({
             </div>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <Label htmlFor="brand">Brand *</Label>
               <Input
@@ -258,6 +266,24 @@ export function ListingForm({
                 onChange={(e) => setForm({ ...form, brand: e.target.value })}
                 placeholder="E.g., Suguna Feed"
               />
+            </div>
+            <div>
+              <Label>Feed Category *</Label>
+              <Select
+                value={form.feed_category}
+                onValueChange={(v) => setForm({ ...form, feed_category: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Pre Starter", "Starter", "Final"].map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="specifications">Specifications (optional)</Label>

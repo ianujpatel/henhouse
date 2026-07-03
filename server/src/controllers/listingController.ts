@@ -21,7 +21,7 @@ export const createListing = async (req: AuthRequest, res: Response): Promise<an
       return res.status(403).json({ message: "Forbidden: Account not approved" });
     }
 
-    const { title, category, breed, quantity, unit, farmer_price, location, description, images, status, brand, is_featured_banner, specifications, target_audience } = req.body;
+    const { title, category, breed, quantity, unit, farmer_price, location, description, images, status, brand, feed_category, is_featured_banner, specifications, target_audience } = req.body;
 
     const isAdmin = req.user.roles.includes("admin");
     if (!isAdmin && category === "feed") {
@@ -43,6 +43,7 @@ export const createListing = async (req: AuthRequest, res: Response): Promise<an
       images: images || [],
       status: isAdmin ? (status || "live") : "pending_pricing",
       brand,
+      feed_category,
       is_featured_banner: is_featured_banner || false,
       specifications,
       target_audience: target_audience || "both",
@@ -191,7 +192,7 @@ export const listMyListings = async (req: AuthRequest, res: Response): Promise<a
     }
 
     const listings = await Listing.find({ farmer_id: req.user.id })
-      .select("id title category breed quantity unit farmer_price buyer_price status location description images image_urls brand is_featured_banner specifications created_at updated_at")
+      .select("id title category breed quantity unit farmer_price buyer_price status location description images image_urls brand feed_category is_featured_banner specifications created_at updated_at")
       .sort({ created_at: -1 });
 
     return res.json(listings);
@@ -236,7 +237,7 @@ export const listMarketplace = async (req: AuthRequest, res: Response): Promise<
 
     const listings = await Listing.find(query)
       .populate("farmer_id", "roles farm_name full_name")
-      .select("id title category breed quantity unit buyer_price location images image_urls brand is_featured_banner specifications target_audience created_at farmer_id")
+      .select("id title category breed quantity unit buyer_price location images image_urls brand feed_category is_featured_banner specifications target_audience created_at farmer_id")
       .sort({ created_at: -1 });
 
     return res.json(listings);
@@ -268,7 +269,7 @@ export const getListingForBuyer = async (req: AuthRequest, res: Response): Promi
 
     const listing = await Listing.findOne(query)
       .populate("farmer_id", "roles farm_name full_name")
-      .select("id title category breed quantity unit buyer_price location description images image_urls brand is_featured_banner specifications target_audience created_at farmer_id");
+      .select("id title category breed quantity unit buyer_price location description images image_urls brand feed_category is_featured_banner specifications target_audience created_at farmer_id");
 
     if (!listing) {
       return res.status(404).json({ message: "Listing not available" });

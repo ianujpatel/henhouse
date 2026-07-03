@@ -231,6 +231,11 @@ function ListingDetail() {
                 <span className="rounded-full bg-primary/10 text-primary border border-primary/20 px-3.5 py-1 text-xs capitalize font-bold">
                   {l.category}
                 </span>
+                {l.category === "feed" && l.feed_category && (
+                  <span className="rounded-full bg-accent/15 text-accent border border-accent/20 px-3.5 py-1 text-xs capitalize font-bold">
+                    {l.feed_category}
+                  </span>
+                )}
                 {l.farmer_id && (
                   <span className="text-xs text-muted-foreground font-medium">
                     Listed by: <span className="text-foreground font-bold">{l.farmer_id.farm_name || l.farmer_id.full_name || "Admin"}</span>
@@ -244,6 +249,12 @@ function ListingDetail() {
 
             {/* Metadata Grid */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {l.category === "feed" && l.feed_category && (
+                <div className="rounded-2xl border border-border/60 bg-secondary/10 p-3 text-center">
+                  <div className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Feed Category</div>
+                  <div className="mt-1 text-sm font-semibold text-foreground">{l.feed_category}</div>
+                </div>
+              )}
               {l.breed && (
                 <div className="rounded-2xl border border-border/60 bg-secondary/10 p-3 text-center">
                   <div className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Breed</div>

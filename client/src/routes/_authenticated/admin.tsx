@@ -25,7 +25,7 @@ const TABS = [
 function AdminLayout() {
   useRequireRole(["admin"]);
   const location = useLocation();
-  const isStandalone = location.pathname.includes("chicks-sell") || location.pathname.includes("feed-sell");
+  const isStandalone = location.pathname.includes("chicks-sell") || location.pathname.includes("feed-sell") || location.pathname.includes("market-rates");
 
   if (isStandalone) {
     return <Outlet />;

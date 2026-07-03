@@ -25,6 +25,7 @@ import notificationRoutes from "./routes/notificationRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import feedRoutes from "./routes/feedRoutes";
 import globalSettingsRoutes from "./routes/globalSettingsRoutes";
+import marketRatesRoutes from "./routes/marketRatesRoutes";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/listings", listingRoutes);
@@ -33,6 +34,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/feeds", feedRoutes);
 app.use("/api/global-settings", globalSettingsRoutes);
+app.use("/api/market-rates", marketRatesRoutes);
 
 
 // Error Handling Middleware

@@ -13,6 +13,7 @@ export interface IListing extends Document {
   location?: string;
   description?: string;
   brand?: string;
+  feed_category?: string;
   is_featured_banner?: boolean;
   specifications?: string;
   images: { public_id: string; secure_url: string; }[];
@@ -54,6 +55,7 @@ const ListingSchema: Schema = new Schema(
     },
     image_urls: { type: [String], default: [] },
     brand: { type: String, trim: true },
+    feed_category: { type: String, trim: true },
     is_featured_banner: { type: Boolean, default: false },
     specifications: { type: String, trim: true },
     target_audience: {
